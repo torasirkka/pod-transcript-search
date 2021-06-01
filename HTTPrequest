@@ -1,0 +1,20 @@
+curl -X POST \
+     -H "Authorization: Bearer "$(gcloud auth application-default print-access-token) \
+     -H "Content-Type: application/json; charset=utf-8" \
+     --data "{
+  'config': {
+    'language_code': 'en-US',
+    'encoding': 'FLAC',
+    "audioChannelCount": 2
+  },
+  'output_config': {
+     'gcs_uri':'gs://audiofiles-storage/transcripts/Yo_is_this_racist_sample.json'
+  },
+  'audio':{
+    'uri':'gs://audiofiles-storage/audio-mp3/Yo_is_this_racist_sample.flac'
+  }
+}" "https://speech.googleapis.com/v1p1beta1/speech:longrunningrecognize"
+
+curl -H "Authorization: Bearer "$(gcloud auth application-default print-access-token) \
+     -H "Content-Type: application/json; charset=utf-8" \
+     "https://speech.googleapis.com/v1p1beta1/operations/8467219014636849663"
