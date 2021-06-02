@@ -1,20 +1,21 @@
-# RSS parsing
+"""Server for pod transcript app."""
 from typing import Dict, List
+from flask import (Flask, render_template, request, flash, session,
+                   redirect)
 import feedparser
+from model import connect_to_db
+import uuid
 
-d = feedparser.parse('https://www.omnycontent.com/d/playlist/89050f29-3cfb-4513-a5d2-ac79004bd7ba/55c64838-70c7-4576-b4e4-ac800012ec27/05855b96-adce-4eaa-9d54-ac8300634c30/podcast.rss')
-smartless = https://feeds.simplecast.com/pvzhyDQn
-print(d.entries[0].title)
-#'First item title'
+app = Flask(__name__)
+app.secret_key = "dev"
+#app.jinja_env.undefined = StrictUndefined
 
-print(d.entries[0].link)
+# Replace this with routes and view functions!
 
-print(d.entries[0].description)
 
-print(d.entries[0].published)
-
-print(d.entries[0].published_parsed)
-print(d.entries[0].id)
+if __name__ == '__main__':
+    connect_to_db(app)
+    app.run(host='0.0.0.0', debug=True)
 
 
 # -----------------------
