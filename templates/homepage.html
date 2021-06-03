@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Podcast transcript site Home{% endblock %}
+
+{% block body %}
+<h1>Welcome!</h1>
+
+<ul>
+  {% for podcast in podcasts %}
+  <li>
+    {{ podcast }}
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}
