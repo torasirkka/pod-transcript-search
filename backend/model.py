@@ -2,6 +2,7 @@
 
 from typing import Optional, Dict, Any
 from datetime import datetime
+import re
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import JSON
@@ -55,7 +56,7 @@ class Episode(db.Model):
         # transcription of files already transcribed!
         LEGAL_FILENAME_CHARS = r'[a-zA-Z0-9]'
 
-        def only_legal_chars(self, s:str):
+        def only_legal_chars(s:str):
             return ''.join([char for char in s if re.match(LEGAL_FILENAME_CHARS, char)])
 
         pod_title = only_legal_chars(self.podcast.title)
