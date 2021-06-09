@@ -9,12 +9,12 @@ import model
 import os
 
 
-def download_and_parse_rss(feed_url: str) -> Optional[Dict]:
+def _download_and_parse_rss(feed_url: str) -> Optional[Dict]:
     """Retrieve podcast data from feedurl."""
     #to-do: remember to add try-except before calling this fn! To check that the feed url is valid
     return podcastparser.parse(feed_url, urllib.request.urlopen(feed_url))
 
-def create_podcast_obj(rss_data: Dict[Any,Any]) -> model.Podcast:
+def _create_podcast_obj(rss_data: Dict[Any,Any]) -> model.Podcast:
     """Create a podcast object."""
     podcast = model.Podcast()
     if 'title' in rss_data:        
@@ -25,12 +25,12 @@ def create_podcast_obj(rss_data: Dict[Any,Any]) -> model.Podcast:
         podcast.description = rss_data['description']
 
         for episode in rss_data['episodes']:
-            ep_obj = create_episode_obj(episode)
+            ep_obj = _create_episode_obj(episode)
             podcast.episodes.append(ep_obj)
             
     return podcast
 
-def create_episode_obj(rss_episode_data: Dict) -> model.Episode:
+def _create_episode_obj(rss_episode_data: Dict) -> model.Episode:
     """Create an episode object."""
     episode = model.Episode()
     if 'title' in rss_episode_data:
@@ -40,13 +40,13 @@ def create_episode_obj(rss_episode_data: Dict) -> model.Episode:
     if 'published' in rss_episode_data:
         episode.release_date = datetime.date.fromtimestamp(rss_episode_data['published'])
     if 'enclosures' in rss_episode_data:
-        episode.mp3_url = parse_episode_mp3_url(rss_episode_data['enclosures'])
+        episode.mp3_url = _parse_episode_mp3_url(rss_episode_data['enclosures'])
     if 'guid' in rss_episode_data:
         episode.guid = rss_episode_data['guid']
 
     return episode
 
-def parse_episode_mp3_url(enclosures: List[Dict]) -> Optional[str]:
+def _parse_episode_mp3_url(enclosures: List[Dict]) -> Optional[str]:
     """Retrieve the podcasts release date."""
 
     id_pattern = r'^audio/'
@@ -59,7 +59,7 @@ def parse_episode_mp3_url(enclosures: List[Dict]) -> Optional[str]:
 def to_podcasts_and_episodes(feed_url: str)-> model.Podcast:
     """Return podcast and episode objects parsed from feed_url."""
     try:
-        rss_data = download_and_parse_rss(podcastparser.normalize_feed_url(feed_url))
+        rss_data = _download_and_parse_rss(podcastparser.normalize_feed_url(feed_url))
     
     except urllib.error.HTTPError as err:
         print(f'{err} when trying to download {rss_url}')
@@ -73,7 +73,7 @@ def to_podcasts_and_episodes(feed_url: str)-> model.Podcast:
         print(f'{err} when trying to parse {rss_url}')
         raise
 
-    return create_podcast_obj(rss_data)
+    return _create_podcast_obj(rss_data)
 
 if __name__ == "__main__":
     from server import app
