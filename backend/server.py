@@ -49,27 +49,19 @@ def get_specific_podcast_json(podcast_id):
 
     return jsonify(podcast)
 
-@app.route("/api/add_podcast", methods = ["POST"])
+
+@app.route("/api/podcasts", methods=["POST"])
 def add_podcast():
     """Parse feed url. If successful: commit podcast and episodes to db.""" 
+
     rss_url = request.get_json()
     print(f'**************************\nthe rss:{rss_url}, {type(rss_url)}')
+
     if not rss_url:
-        return f"Url is empty"
+        return "Empty or outdated url."
+
     try:
         new_podcast = parse_rss.to_podcasts_and_episodes(rss_url)
-        # check if podcast already in db:
-        titles_in_db = [pod.title for pod in model.Podcast.query.all()]
-        #print(titles_in_db)
-        if new_podcast.title in model.Podcast.query.all():
-            return f"{new_podcast.title} already exists in library!"
-            # TO_DO HOW TO GET THE ID OF THE PODCAST?
-            #return redirect('/api/podcasts/{}')
-        else:
-            model.db.session.add(new_podcast)
-            model.db.session.commit()
-            return f"{new_podcast.title} successfully added!"
-            #return redirect('/api/podcasts/{new_podcast.podcast_id}') 
 
     except urllib.error.HTTPError as err:
         return f"{err}\n Uups, I can't seem to download podcast data from {rss_url}."
@@ -79,6 +71,28 @@ def add_podcast():
 
     except podcastparser.FeedParseError as err:
         return f"{err} Could not parse the info in the url."
+        
+    # check if podcast already in db:
+    titles_in_db = [pod.title for pod in model.Podcast.query.all()]
+    if new_podcast.title in titles_in_db:
+        return f"{new_podcast.title} already exists in library!" 
+
+    # Validate that the content is podcast-related. Valid podcasts must have >= 10% 
+    # non-empty mp3_urls:
+    mp3_urls = [episode.mp3_url for episode in new_podcast.episodes]
+    if mp3_urls.count(None)/len(mp3_urls) >= 0.1:
+        return f"{new_podcast.title} is not a valid podcast feed."
+    else:
+        model.db.session.add(new_podcast)
+        model.db.session.commit()
+        #return f"{new_podcast.title} successfully added!"  # return new podcast obj as JSON
+    
+        podcast = {
+            "id": pod.podcast_id,
+            "title": pod.title,
+            "description": pod.description,
+            "img_url": pod.img_url,
+            }
 
 if __name__ == "__main__":
     model.connect_to_db(app)
