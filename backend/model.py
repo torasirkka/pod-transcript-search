@@ -14,10 +14,10 @@ class Podcast(db.Model):
 
     __tablename__ = "podcasts"
 
-    podcast_id = db.Column(db.Integer(), primary_key=True, nullable=False, autoincrement=True)
-    title = db.Column(db.String(500))
-    img_url = db.Column(db.String(500))
-    description = db.Column(db.Text())
+    podcast_id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    title = db.Column(db.String)
+    img_url = db.Column(db.String)
+    description = db.Column(db.Text)
 
     episodes = db.relationship("Episode", backref="podcast")
 
@@ -30,39 +30,45 @@ class Episode(db.Model):
 
     __tablename__ = "episodes"
 
-    episode_id = db.Column(db.Integer(), primary_key=True, nullable=False, autoincrement=True)
+    episode_id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
     podcast_id = db.Column(
         db.Integer(), db.ForeignKey("podcasts.podcast_id"))
-    episode_title = db.Column(db.String(100))
-    description = db.Column(db.Text())
-    release_date = db.Column(db.DateTime())
-    mp3_url = db.Column(db.String(800))
+    episode_title = db.Column(db.String)
+    description = db.Column(db.Text)
+    release_date = db.Column(db.DateTime)
+    mp3_url = db.Column(db.String)
     transcript = db.Column(db.JSON)
-    status = db.Column(db.String(10))
-    guid = db.Column(db.String(200))
+    status = db.Column(db.String)
+    guid = db.Column(db.String)
 
     def __repr__(self):
         return (
             f"<Episode episode_id={self.episode_id} episode_title={self.episode_title}>"
         )
 
-    def cache_id(self):
+    def cache_id(self) -> str:
         """Hash fn that generates a unique id for a podcast episode. 
     
         This is the filename for the transcriptions cache stored used as back-up.
         It consists of the first 15 chars of the podcast and episode titles + the
-        32 last episode uuid chars"""
+        32 last episode uuid chars.
+        """
+        
+        # TODO: check out https://docs.python.org/3/library/functools.html#functools.cached_property
+
         # WARNING: LEGAL_FILENAME_CHARS is used in hash fn to generate unique ids. DO NOT ALTER! May cause 
         # transcription of files already transcribed!
         LEGAL_FILENAME_CHARS = r'[a-zA-Z0-9]'
 
-        def only_legal_chars(s:str):
+        def only_legal_chars(s: str) -> str:
             return ''.join([char for char in s if re.match(LEGAL_FILENAME_CHARS, char)])
 
         pod_title = only_legal_chars(self.podcast.title)
         ep_title = only_legal_chars(self.episode_title)
         ep_guid = only_legal_chars(self.guid)
+
         return pod_title[:17] + ep_title[:17] + ep_guid[-32:]
+
 
 def connect_to_db(flask_app, db_uri="postgresql:///podcasts", echo=True):
     flask_app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
