@@ -45,7 +45,7 @@ class Episode(db.Model):
         return (
             f"<Episode episode_id={self.episode_id} episode_title={self.episode_title}>"
         )
-
+    @cached_property
     def cache_id(self) -> str:
         """Hash fn that generates a unique id for a podcast episode. 
     
