@@ -7,12 +7,6 @@ import podcastparser
 
 app = Flask(__name__)
 
-@app.route("/")
-def homepage():
-    """View homepage."""
-
-    return render_template("homepage.html")
-
 # GET /api/podcasts -> list of all podcasts
 # POST /api/podcasts -> create podcast from rss feed
 # GET /api/podcasts/<id> -> one podcast
@@ -40,11 +34,13 @@ def get_podcasts_json():
 def get_specific_podcast_json(podcast_id):
     """Return a JSON response details about one podcasts in db."""
     pod = model.Podcast.query.get(podcast_id)
+    episode_ids = [ep.episode_id for ep in model.Podcast.query.all()]
     podcast = {
         "id": pod.podcast_id,
         "title": pod.title,
         "description": pod.description,
         "img_url": pod.img_url,
+        "episodes": episode_ids
         }
 
     return jsonify(podcast)
