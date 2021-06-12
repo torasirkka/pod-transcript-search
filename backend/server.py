@@ -34,16 +34,43 @@ def get_podcasts_json():
 def get_specific_podcast_json(podcast_id):
     """Return a JSON response details about one podcasts in db."""
     pod = model.Podcast.query.get(podcast_id)
-    episode_ids = [ep.episode_id for ep in model.Podcast.query.all()]
+    episode_ids = [ep.episode_id for ep in pod.episodes]
     podcast = {
         "id": pod.podcast_id,
         "title": pod.title,
         "description": pod.description,
         "img_url": pod.img_url,
-        "episodes": episode_ids
+        "episode_ids": episode_ids
         }
 
     return jsonify(podcast)
+
+@app.route("/api/podcasts/<int:podcast_id>/search")
+def get_podcast_episodes(podcast_id):
+    """Return a JSON response details about one podcasts in db."""
+    
+    pod = model.Podcast.query.get(podcast_id)
+    search_term = request.args.get('q', '')
+
+    # create list of dicts with episode information:
+    episodes = []
+    for ep in pod.episodes:
+        ep_data = {
+            "title": ep.episode_title,
+            "description": ep.description,
+            "published": ep.release_date,
+            "mp3_url": ep.mp3_url,
+            "transcript": ep.transcript,
+            "status": ep.status,
+            "guid": ep.guid
+            }
+
+        if not search_term:
+            episodes.append(ep_data)
+        else:
+            if search_term in ep_data["description"]:
+                episodes.append(ep_data)
+    return jsonify(episodes)
 
 
 @app.route("/api/podcasts", methods=["POST"])
@@ -51,7 +78,6 @@ def add_podcast():
     """Parse feed url. If successful: commit podcast and episodes to db.""" 
 
     rss_url = request.get_json()
-    print(f'**************************\nthe rss:{rss_url}, {type(rss_url)}')
 
     if not rss_url:
         return "Empty or outdated url."
@@ -84,10 +110,11 @@ def add_podcast():
         #return f"{new_podcast.title} successfully added!"  # return new podcast obj as JSON
     
         podcast = {
-            "id": pod.podcast_id,
-            "title": pod.title,
-            "description": pod.description,
-            "img_url": pod.img_url,
+            "id": new_podcast.podcast_id,
+            "title": new_podcast.title,
+            "description": new_podcast.description,
+            "img_url": new_podcast.img_url,
+            "episodes": [ep.episode_id for ep in pod.episodes]
             }
 
 if __name__ == "__main__":
