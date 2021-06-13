@@ -75,7 +75,7 @@ def get_podcast_episodes(podcast_id):
 
 @app.route("/api/podcasts", methods=["POST"])
 def add_podcast():
-    """Parse feed url. If successful: commit podcast and episodes to db.""" 
+    """Parse feed url. If successful: commit podcast and episodes to db. Return podcast""" 
 
     rss_url = request.get_json()
 
@@ -109,13 +109,15 @@ def add_podcast():
         model.db.session.commit()
         #return f"{new_podcast.title} successfully added!"  # return new podcast obj as JSON
     
+        episode_ids = [ep.episode_id for ep in new_podcast.episodes]
         podcast = {
             "id": new_podcast.podcast_id,
             "title": new_podcast.title,
             "description": new_podcast.description,
             "img_url": new_podcast.img_url,
-            "episodes": [ep.episode_id for ep in pod.episodes]
+            "episode_ids": episode_ids
             }
+        return podcast
 
 if __name__ == "__main__":
     model.connect_to_db(app)
