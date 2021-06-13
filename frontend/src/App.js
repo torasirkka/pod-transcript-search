@@ -1,36 +1,55 @@
-import logo from './logo.svg';
-import './App.css';
-import React, { useState, useEffect } from 'react';
-import { Podcasts } from './components/Podcasts';
-import ReactDOM from 'react-dom'
+import React from "react";
 import
-  {
-    BrowserRouter as Router,
-    Switch,
-    Route,
-    Link
-  } from "react-router-dom";
-
-
-function App()
 {
-  const [podcasts, setPodcasts] = useState([]);
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useParams
+} from "react-router-dom";
 
-  useEffect(() =>
-  {
-    fetch('/api/podcasts').then(response =>
-      response.json().then(data =>
-      {
-        setPodcasts(data);
-      })
-    );
-  }, []);
-  console.log(podcasts);
+import './App.css';
+import { Podcasts, PodcastDetails } from './components/Podcasts';
+
+
+
+export function App()
+{
   return (
-    <div className='App'>
-      <Podcasts podcasts={podcasts} />
-    </div>
+    <Router>
+      <div>
+        <ul>
+          <li>
+            <Link to="/podcasts">Podcasts</Link>
+          </li>
+          <li>
+            <Link to="/podcast-details">Dashboard</Link>
+          </li>
+        </ul>
+
+        <hr />
+
+        {/*
+          A <Switch> looks through all its children <Route>
+          elements and renders the first one whose path
+          matches the current URL. Use a <Switch> any time
+          you have multiple routes, but you want only one
+          of them to render at a time
+        */}
+        <Switch>
+          <Route path="/podcasts">
+            <Podcasts />
+          </Route>
+          <Route path="/podcast/:id">
+            <PodcastDetails />
+          </Route>
+        </Switch>
+      </div>
+    </Router >
   );
 }
 
-export default App;
+// You can think of these components as "pages"
+// in your app.
+
+
