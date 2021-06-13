@@ -36,9 +36,6 @@ model.db.session.commit()
 print('success!')
 
 
-
-
-
 # def example_data_using_crud():
 #     """Create test data using the CRUD functions.
 
@@ -94,7 +91,7 @@ print('success!')
 if __name__ == "__main__":
     from server import app
 
-#    connect_to_db(app)
+    connect_to_db(app)
 #    db.create_all()
     #example_data()
     

@@ -13,7 +13,7 @@ function PodcastContainer()
 
     React.useEffect(() =>
     {
-        fetch('/api/all-podcasts.json')
+        fetch('/api/podcasts')
             .then((response) => response.json())
             .then((data) => updatePodcasts(data))
     }, [])

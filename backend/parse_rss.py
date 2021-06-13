@@ -85,15 +85,15 @@ if __name__ == "__main__":
     model.db.create_all()
     file = open("RSS_feeds.txt")
     i = 0
-    for rss_url in file:
-        podcast = to_podcasts_and_episodes(rss_url)
-        objects_list = [podcast] + podcast.episodes
-        print(objects_list)
-        model.db.session.add_all(objects_list)
-        print('*'*40)
-        print('')
-        print(f'RSS feed nr {i}')
-        i += 0
+    # for rss_url in file:
+    #     podcast = to_podcasts_and_episodes(rss_url)
+    #     objects_list = [podcast] + podcast.episodes
+    #     print(objects_list)
+    #     model.db.session.add_all(objects_list)
+    #     print('*'*40)
+    #     print('')
+    #     print(f'RSS feed nr {i}')
+    #     i += 0
     model.db.session.commit()
     print('success!')
 

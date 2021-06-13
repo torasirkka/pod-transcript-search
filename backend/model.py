@@ -3,6 +3,7 @@
 from typing import Optional, Dict, Any
 from datetime import datetime
 import re
+from functools import cached_property
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import JSON
