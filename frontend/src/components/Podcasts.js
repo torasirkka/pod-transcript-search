@@ -1,6 +1,7 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { generatePath } from 'react-router';
 
 export function Podcasts()
 {
@@ -17,26 +18,28 @@ export function Podcasts()
     }, []);
     console.log(podcasts);
     return (
-        <div className='podcast'>
+        <div className='podcasts'>
             <PodcastList podcasts={podcasts} />
         </div>
     );
 }
 
-export function PodcastList(props)
+function PodcastList(props)
 {
     return (
         <ul>
-            {props.podcasts.map(podcast => <li key={podcast.title}>{podcast.title}</li>)}
-        </ul >
+            {props.podcasts.map(podcast =>
+                <li key={podcast.title}>
+                    <Link to={generatePath("/podcast/:id", { id: podcast.id })}>{podcast.title}</Link>
+                </li>
+            )}
+        </ul>
     )
 };
 
-
-export function PodcastDetails()
+export function PodcastContainer()
 {
     const params = useParams();
-
     const [podcast, setPodcast] = useState(null);
 
     useEffect(() =>
@@ -48,15 +51,23 @@ export function PodcastDetails()
             })
         );
     }, [params.id]);
-    console.log(podcast);
     if (podcast === null)
     {
-        return 'loading...'
+        return <p>'loading...'</p>
     }
 
     return (
-        <div>
-            <h2>{podcast.title}</h2>
-        </div>
+        <PodcastHeader podcast={podcast} />
     );
+}
+
+function PodcastHeader(props)
+{
+    return (
+        <div className='podcast-details'>
+            <h2>{props.podcast.title}</h2>
+            <p>{props.podcast.description}</p>
+            <img src={props.podcast.img_url} width={100}></img>
+        </div>
+    )
 }
