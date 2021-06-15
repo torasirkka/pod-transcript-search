@@ -51,7 +51,7 @@ def get_podcast_episodes(podcast_id):
     """Return a JSON response details about one podcasts in db."""
 
     pod = model.Podcast.query.get(podcast_id)
-    search_term = request.args.get("q", "")
+    query = request.args.get("q", "")
 
     # create list of dicts with episode information:
     episodes = []
@@ -67,10 +67,10 @@ def get_podcast_episodes(podcast_id):
             "guid": ep.guid,
         }
 
-        if not search_term:
+        if not query:
             episodes.append(ep_data)
         else:
-            if search_term in ep_data["description"]:
+            if query in ep_data["description"]:
                 episodes.append(ep_data)
     return jsonify(episodes)
 
