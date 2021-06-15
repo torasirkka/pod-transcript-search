@@ -36,13 +36,11 @@ def get_podcasts_json():
 def get_specific_podcast_json(podcast_id):
     """Return a JSON response details about one podcasts in db."""
     pod = model.Podcast.query.get(podcast_id)
-    episode_ids = [ep.episode_id for ep in pod.episodes]
     podcast = {
         "id": pod.podcast_id,
         "title": pod.title,
         "description": pod.description,
         "img_url": pod.img_url,
-        "episode_ids": episode_ids,
     }
 
     return jsonify(podcast)
@@ -59,6 +57,7 @@ def get_podcast_episodes(podcast_id):
     episodes = []
     for ep in pod.episodes:
         ep_data = {
+            "id": ep.episode_id,
             "title": ep.episode_title,
             "description": ep.description,
             "published": ep.release_date,

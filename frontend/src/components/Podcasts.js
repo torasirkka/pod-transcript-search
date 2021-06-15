@@ -16,7 +16,6 @@ export function Podcasts()
             })
         );
     }, []);
-    //console.log(podcasts);
     return (
         <div className='podcasts'>
             <PodcastList podcasts={podcasts} />
@@ -39,9 +38,12 @@ function PodcastList(props)
 
 export function PodcastContainer()
 {
-    const params = useParams();
     const [podcast, setPodcast] = useState(null);
+    const [query, setQuery] = useState('')
+    const [episodes, setEpisodes] = useState([]);
 
+
+    const params = useParams();
     useEffect(() =>
     {
         fetch('/api/podcasts/' + params.id).then(response =>
@@ -51,8 +53,6 @@ export function PodcastContainer()
             })
         );
     }, [params.id]);
-
-    const [episodes, setEpisodes] = useState([]);
 
     useEffect(() =>
     {
@@ -73,6 +73,7 @@ export function PodcastContainer()
     return (
         <div>
             <PodcastHeader podcast={podcast} />
+            <SearchEpisodes query={setQuery} />
             <EpisodeList episodes={episodes} />
         </div>
     );
@@ -84,23 +85,48 @@ function PodcastHeader(props)
         <div className='podcast-details'>
             <h2>{props.podcast.title}</h2>
             <p>{props.podcast.description}</p>
-            <img src={props.podcast.img_url} width={100}></img>
-        </div>
+            <img src={props.podcast.img_url} alt={'Podcast cover art'} width={100} />
+        </div >
     )
+}
+
+function SearchEpisodes()
+{
+    function handleSubmit(e)
+    {
+        e.preventDefault();
+        console.log(e);
+    }
+    return (
+        <form onSubmit={handleSubmit} >
+            <label>
+                Search episodes:
+                <input type="text" />
+            </label>
+            <input type="submit" value="Submit" />
+        </form >
+    );
 }
 
 function EpisodeList(props)
 {
-    console.log(props.episodes)
+    console.log(props.episodes[0])
     return (
-        <div className='episodes-list'>
-            {props.episodes.map(episode =>
-                <div key={episode.id}>
-                    <h2>{episode.title}</h2>
-                    <p>{episode.description}</p>
-                    <p>{episode.transcript}</p>
-                </div>
+        <div key={props.episodes} className='episodes-list'>
+            {props.episodes.map(
+                ep => <EpisodeListItem key={ep.id} episode={ep} />
             )}
         </div >
+    );
+}
+
+function EpisodeListItem(props)
+{
+    return (
+        <div>
+            <h3>{props.episode.title}</h3>
+            <p>{props.episode.description}</p>
+            <p>{props.episode.transcript}</p>
+        </div>
     );
 }

@@ -5,7 +5,6 @@ import
   Switch,
   Route,
   Link,
-  useParams
 } from "react-router-dom";
 
 import './App.css';
