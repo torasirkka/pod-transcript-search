@@ -16,7 +16,7 @@ export function Podcasts()
             })
         );
     }, []);
-    console.log(podcasts);
+    //console.log(podcasts);
     return (
         <div className='podcasts'>
             <PodcastList podcasts={podcasts} />
@@ -51,13 +51,30 @@ export function PodcastContainer()
             })
         );
     }, [params.id]);
+
+    const [episodes, setEpisodes] = useState([]);
+
+    useEffect(() =>
+    {
+        fetch('/api/podcasts/' + params.id + '/search').then(response =>
+            response.json().then(data =>
+            {
+                setEpisodes(data);
+            })
+        );
+    }, []);
+    //console.log(episodes);
+
     if (podcast === null)
     {
         return <p>'loading...'</p>
     }
 
     return (
-        <PodcastHeader podcast={podcast} />
+        <div>
+            <PodcastHeader podcast={podcast} />
+            <EpisodeList episodes={episodes} />
+        </div>
     );
 }
 
@@ -70,4 +87,20 @@ function PodcastHeader(props)
             <img src={props.podcast.img_url} width={100}></img>
         </div>
     )
+}
+
+function EpisodeList(props)
+{
+    console.log(props.episodes)
+    return (
+        <div className='episodes-list'>
+            {props.episodes.map(episode =>
+                <div key={episode.id}>
+                    <h2>{episode.title}</h2>
+                    <p>{episode.description}</p>
+                    <p>{episode.transcript}</p>
+                </div>
+            )}
+        </div >
+    );
 }

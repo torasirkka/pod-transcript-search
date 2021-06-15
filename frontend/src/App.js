@@ -34,8 +34,3 @@ export function App()
     </Router >
   );
 }
-
-// You can think of these components as "pages"
-// in your app.
-
-
