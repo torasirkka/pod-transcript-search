@@ -42,7 +42,6 @@ export function PodcastContainer()
     const [query, setQuery] = useState('')
     const [episodes, setEpisodes] = useState([]);
 
-
     const params = useParams();
     useEffect(() =>
     {
@@ -56,14 +55,13 @@ export function PodcastContainer()
 
     useEffect(() =>
     {
-        fetch('/api/podcasts/' + params.id + '/search').then(response =>
+        fetch('/api/podcasts/' + params.id + '/search?q=' + query).then(response =>
             response.json().then(data =>
             {
                 setEpisodes(data);
             })
         );
-    }, []);
-    //console.log(episodes);
+    }, [query, params.id]);
 
     if (podcast === null)
     {
@@ -73,8 +71,8 @@ export function PodcastContainer()
     return (
         <div>
             <PodcastHeader podcast={podcast} />
-            <SearchEpisodes query={setQuery} />
-            <EpisodeList episodes={episodes} />
+            <SearchEpisodes query={query} setQuery={setQuery} />
+            <EpisodeList episodes={episodes} query={query} />
         </div>
     );
 }
@@ -90,29 +88,24 @@ function PodcastHeader(props)
     )
 }
 
-function SearchEpisodes()
+function SearchEpisodes(props)
 {
-    function handleSubmit(e)
+    function handleChange(e)
     {
-        e.preventDefault();
-        console.log(e);
+        props.setQuery(e.target.value)
     }
     return (
-        <form onSubmit={handleSubmit} >
-            <label>
-                Search episodes:
-                <input type="text" />
-            </label>
-            <input type="submit" value="Submit" />
-        </form >
+        <label>
+            Search episodes:
+            <input type="text" value={props.query} onChange={handleChange} />
+        </label>
     );
 }
 
 function EpisodeList(props)
 {
-    console.log(props.episodes[0])
     return (
-        <div key={props.episodes} className='episodes-list'>
+        <div key={props.query} className='episodes-list'>
             {props.episodes.map(
                 ep => <EpisodeListItem key={ep.id} episode={ep} />
             )}
