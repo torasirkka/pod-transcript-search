@@ -10,12 +10,15 @@ from sqlalchemy.dialects.postgresql import JSON
 
 db = SQLAlchemy()
 
+
 class Podcast(db.Model):
     """A podcast."""
 
     __tablename__ = "podcasts"
 
-    podcast_id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    podcast_id = db.Column(
+        db.Integer, primary_key=True, nullable=False, autoincrement=True
+    )
     title = db.Column(db.String)
     img_url = db.Column(db.String)
     description = db.Column(db.Text)
@@ -31,9 +34,10 @@ class Episode(db.Model):
 
     __tablename__ = "episodes"
 
-    episode_id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    podcast_id = db.Column(
-        db.Integer(), db.ForeignKey("podcasts.podcast_id"))
+    episode_id = db.Column(
+        db.Integer, primary_key=True, nullable=False, autoincrement=True
+    )
+    podcast_id = db.Column(db.Integer(), db.ForeignKey("podcasts.podcast_id"))
     episode_title = db.Column(db.String)
     description = db.Column(db.Text)
     release_date = db.Column(db.DateTime)
@@ -46,23 +50,24 @@ class Episode(db.Model):
         return (
             f"<Episode episode_id={self.episode_id} episode_title={self.episode_title}>"
         )
+
     @cached_property
-    def cache_id(self) -> str:
-        """Hash fn that generates a unique id for a podcast episode. 
-    
+    def fname(self) -> str:
+        """Hash fn that generates a unique fname for a podcast episode.
+
         This is the filename for the transcriptions cache stored used as back-up.
         It consists of the first 15 chars of the podcast and episode titles + the
         32 last episode uuid chars.
         """
-        
+
         # TODO: check out https://docs.python.org/3/library/functools.html#functools.cached_property
 
-        # WARNING: LEGAL_FILENAME_CHARS is used in hash fn to generate unique ids. DO NOT ALTER! May cause 
+        # WARNING: LEGAL_FILENAME_CHARS is used in hash fn to generate unique ids. DO NOT ALTER! May cause
         # transcription of files already transcribed!
-        LEGAL_FILENAME_CHARS = r'[a-zA-Z0-9]'
+        LEGAL_FILENAME_CHARS = r"[a-zA-Z0-9]"
 
         def only_legal_chars(s: str) -> str:
-            return ''.join([char for char in s if re.match(LEGAL_FILENAME_CHARS, char)])
+            return "".join([char for char in s if re.match(LEGAL_FILENAME_CHARS, char)])
 
         pod_title = only_legal_chars(self.podcast.title)
         ep_title = only_legal_chars(self.episode_title)
