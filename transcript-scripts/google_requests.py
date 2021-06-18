@@ -3,6 +3,7 @@ from typing import List
 from google.cloud import storage
 
 BUCKET_NAME = "audiofiles-storage"
+AUDIO_FILE_PATH = BUCKET_NAME + "/audio-flac"
 PREFIX = "transcripts"
 
 
@@ -24,6 +25,22 @@ def _get_blob_names(client: storage.Client, bucket_name: str) -> List[str]:
     return [blob.name for blob in blobs]
 
 
+from google.cloud import storage
+
+
+def upload_blob(
+    source_file_name: str, client: storage.Client(), bucket_name=BUCKET_NAME
+):
+    """Uploads a file to the bucket."""
+
+    bucket = client.get_bucket(bucket_name)
+    blob = bucket.blob(AUDIO_FILE_PATH + source_file_name)
+    # TODO fix timeout on upload!! Can I download directly to bucket? How to integrate with the rest of the transcription pipeline?
+    blob.upload_from_filename(source_file_name)
+
+    print("File {} uploaded to {}.".format(source_file_name, destination_blob_name))
+
+
 if __name__ == "__main__":
     client = storage.Client()
 
@@ -39,4 +56,9 @@ if __name__ == "__main__":
         client,
         file_name="transcripts/Yo_is_this_racist_sample.json",
         bucket_name="audiofiles-storage",
+    )
+
+    test4 = upload_blob(
+        "/Users/torasirkka/Documents/Hackbright2021/MyProject/podsearch/transcript-scripts/YoIsThisRacistCuriousGeorgeYOURdfee1f45663041c9a518ad42004f34de.flac",
+        client,
     )

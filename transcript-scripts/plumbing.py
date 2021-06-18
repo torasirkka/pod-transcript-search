@@ -35,7 +35,8 @@ def initiate_episode_transcription() -> model.Episode:
     # model.db.session.add(chosen_ep)
     # model.db.session.commit()
     return chosen_ep
-
+BUCKET_NAME = "audiofiles-storage"
+AUDIO_FILE_PATH = BUCKET_NAME + "/audio-flac"
 
 def episodes_without_transcript() -> List[model.Episode]:
     """List episodes that do not have a transcription."""
@@ -46,12 +47,19 @@ def episodes_without_transcript() -> List[model.Episode]:
 def transcribe_episode(ep: model.Episode):
     """Pre-process sound. If successful preprocess: transcribe episode. Set and commit status of episode."""
     audio_download_and_processing(ep)
-    print(ep.status)
+    print(
+        f"Transcription of \npodcast: {ep.podcast},\nepisode: {ep.episode_title}\nStatus: {ep.status}"
+    )
     if ep.status == STATUS[3]:
-        # if audiodownload and conversion not successful: interrupt the transcription process
-        print("woops")
-
-    pass
+        # if audiodownload and conversion not successful: interrupt the transcribing process
+        return
+    else:
+        # upload flac file to bucket
+        converted_audio_fname = ep.fname + ".flac"
+        google_requests.upload_blob(source_file_name= converted_audio_fname, client= storage.Client, bucket_name=BUCKET_NAME):
+        # make transcript request. Remember to ask for time-stamps!
+        # delete local flac file
+        # delete remote flac file
 
 
 def audio_download_and_processing(ep: model.Episode):
