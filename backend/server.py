@@ -109,7 +109,6 @@ def add_podcast():
     else:
         model.db.session.add(new_podcast)
         model.db.session.commit()
-        # return f"{new_podcast.title} successfully added!"  # return new podcast obj as JSON
 
         episode_ids = [ep.episode_id for ep in new_podcast.episodes]
         podcast = {
