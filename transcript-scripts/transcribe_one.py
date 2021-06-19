@@ -1,4 +1,7 @@
 import sys
+import os
+from urllib.parse import urlparse
+from google.cloud import storage
 
 BUCKET_NAME = "audiofiles-storage"
 AUDIO_FLAC_PATH = "audio-flac"
@@ -10,7 +13,15 @@ def main():
     audio_url = sys.argv[1]
     name = sys.argv[2]
 
-    print(audio_url, name)
+    print(f"Path to resource:{audio_url}")
+    print(f"Unique identifier:{name}")
+
+    # 0. Check if file in bucket. If yes: return None
+    transcribed_name = name + ".json"
+    if file_is_in_bucket(
+        client, transcribed_name, BUCKET_NAME, TRANSCRIPTION_JSON_PATH
+    ):
+        return
 
     # 1. Download and rename file. Maintain file ext.
     file_name = download(audio_url, name)
@@ -18,7 +29,7 @@ def main():
     # 2. Convert to mono, flac, creating new file.
     flac_file_name = convert_to_flac(file_name)
 
-    # 3.
+    # 3. Upload flac
     client = get_google_storage_client()
     upload_to_bucket(
         client,
@@ -27,9 +38,46 @@ def main():
         destination_path=AUDIO_FLAC_PATH,
     )
 
-    # 4. transcribe
+    # 4. transcribe & check transcription is in bucket
     session = get_google_api_session()
     transcribe(session, name, BUCKET_NAME, TRANSCRIPTION_JSON_PATH, AUDIO_FLAC_PATH)
+
+
+def file_is_in_bucket(
+    client: storage.Client,
+    file_name: str,
+    bucket_name: str,
+    path,
+) -> bool:
+    """Checks if a file with the name file_name is found in the bucket."""
+
+    names = _get_blob_names(client, bucket_name, path)
+    return file_name in names
+
+
+def _get_blob_names(client: storage.Client, bucket_name: str, path: str) -> List[str]:
+    """Get list of all filenames in the bucket."""
+
+    blobs = client.list_blobs(bucket_name, path)
+    # Each blob has an attribute 'name', which is the one we are after.
+    return [blob.name for blob in blobs]
+
+
+def download(url: str, name: str) -> str:
+    """Download resource found at url to current directory.
+
+    Name resource 'name.xyz', where xyz is file extension parsed from url."""
+
+    file_ext = get_file_ext(url)
+
+    return
+
+
+def get_file_ext(url: str) -> str:
+    """Parse out the file extension from a url, indicating what the file type is of the linked data."""
+    file_type = os.path.basename(urlparse(url).path)
+    _, file_ext = os.path.splitext(file_type)
+    return file_ext
 
 
 def transcribe(session, name, bucket, destination_path, source_path):
@@ -52,4 +100,5 @@ def download(url: str, name: str) -> None:
 
 
 if __name__ == "__main__":
+    client = storage.Client()
     main()
