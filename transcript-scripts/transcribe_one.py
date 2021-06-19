@@ -1,5 +1,7 @@
 import sys
 import os
+import subprocess
+
 from urllib.parse import urlparse
 from google.cloud import storage
 
@@ -27,7 +29,7 @@ def main():
     file_name = download(audio_url, name)
 
     # 2. Convert to mono, flac, creating new file.
-    flac_file_name = convert_to_flac(file_name)
+    flac_file_name = convert_to_flac(file_name, name)
 
     # 3. Upload flac
     client = get_google_storage_client()
@@ -69,8 +71,10 @@ def download(url: str, name: str) -> str:
     Name resource 'name.xyz', where xyz is file extension parsed from url."""
 
     file_ext = get_file_ext(url)
+    file_name = name + file_ext
+    download_process = subprocess.run(["curl", "-L", "-o", audio_fname, ep.mp3_url])
 
-    return
+    return file_name
 
 
 def get_file_ext(url: str) -> str:
@@ -78,6 +82,15 @@ def get_file_ext(url: str) -> str:
     file_type = os.path.basename(urlparse(url).path)
     _, file_ext = os.path.splitext(file_type)
     return file_ext
+
+
+def convert_to_flac(file_name, name) -> str:
+    """Create new audio file by converting audio in file_name to flac and mono. Name new file name.flac"""
+
+    conversion = subprocess.run(
+        ["ffmpeg", "-y", "-i", audio_fname, "-ac", "1", converted_audio_fname]
+    )
+    return name + flac
 
 
 def transcribe(session, name, bucket, destination_path, source_path):
