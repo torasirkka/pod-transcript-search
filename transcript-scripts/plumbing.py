@@ -16,12 +16,20 @@ import google_requests
 
 model.connect_to_db(server.app)
 STATUS = [None, "in progress", "done", "error"]
+BUCKET_NAME = "audiofiles-storage"
+AUDIO_FILE_PATH = "audio-flac"
 
 
 def initiate_episode_transcription() -> model.Episode:
-    """"""
+    """Identifies a podcast without transcription.
+    Initiates process to get the transcription."""
     episodes = episodes_without_transcript()
     chosen_ep = episodes[0]
+    # TODO Remove! Only for testing! Overwriting w.short trailer.
+    chosen_ep = model.Episode.query.filter(
+        model.Episode.episode_title.contains("Trailer")
+    ).first()
+
     # updating but not yet committing status
     chosen_ep.status = STATUS[1]
     # checking if transcript exists in google bucket
@@ -35,8 +43,7 @@ def initiate_episode_transcription() -> model.Episode:
     # model.db.session.add(chosen_ep)
     # model.db.session.commit()
     return chosen_ep
-BUCKET_NAME = "audiofiles-storage"
-AUDIO_FILE_PATH = BUCKET_NAME + "/audio-flac"
+
 
 def episodes_without_transcript() -> List[model.Episode]:
     """List episodes that do not have a transcription."""
@@ -56,7 +63,12 @@ def transcribe_episode(ep: model.Episode):
     else:
         # upload flac file to bucket
         converted_audio_fname = ep.fname + ".flac"
-        google_requests.upload_blob(source_file_name= converted_audio_fname, client= storage.Client, bucket_name=BUCKET_NAME):
+        google_requests.upload_blob(
+            source_file_name=converted_audio_fname,
+            bucket_name=BUCKET_NAME,
+            target_file_path=os.path.join(AUDIO_FILE_PATH, converted_audio_fname),
+            client=client,
+        )
         # make transcript request. Remember to ask for time-stamps!
         # delete local flac file
         # delete remote flac file
@@ -91,17 +103,11 @@ def delete_audio_files():
     """Remove audiofiles from current folder"""
 
 
-url = "https://chrt.fm/track/FE12B2/traffic.omny.fm/d/clips/89050f29-3cfb-4513-a5d2-ac79004bd7ba/55c64838-70c7-4576-b4e4-ac800012ec27/dfee1f45-6630-41c9-a518-ad42004f34de/audio.mp3?utm_source=Podcast&in_playlist=05855b96-adce-4eaa-9d54-ac8300634c3"
-
-x = urlparse(url)
-y = os.path.basename(x.path)
-print(os.path.splitext(y))
-print(y)
-
-
 if __name__ == "__main__":
     client = storage.Client()
     # eps = episodes_without_transcript()
     initiate_episode_transcription()
     # print(audio_download_and_processing(url))
     # subprocess.run(["curl", "-L", "-o", "test.mp3", url])
+
+    url = "https://chrt.fm/track/FE12B2/traffic.omny.fm/d/clips/89050f29-3cfb-4513-a5d2-ac79004bd7ba/55c64838-70c7-4576-b4e4-ac800012ec27/dfee1f45-6630-41c9-a518-ad42004f34de/audio.mp3?utm_source=Podcast&in_playlist=05855b96-adce-4eaa-9d54-ac8300634c3"
