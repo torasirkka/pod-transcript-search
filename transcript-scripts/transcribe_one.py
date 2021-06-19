@@ -5,6 +5,9 @@ import subprocess
 from urllib.parse import urlparse
 from google.cloud import storage
 
+from google.oauth2 import service_account
+from google.auth.transport.requests import AuthorizedSession
+
 BUCKET_NAME = "audiofiles-storage"
 AUDIO_FLAC_PATH = "audio-flac"
 TRANSCRIPTION_JSON_PATH = "transcripts"
@@ -84,7 +87,7 @@ def get_file_ext(url: str) -> str:
     return file_ext
 
 
-def convert_to_flac(file_name, name) -> str:
+def convert_to_flac(file_name: str, name:str) -> str:
     """Create new audio file by converting audio in file_name to flac and mono. Name new file name.flac"""
 
     conversion = subprocess.run(
@@ -112,8 +115,16 @@ def upload_to_bucket(
     blob.upload_from_filename(file, target_file_path)
     print("File {} uploaded to {}.".format(file_path, destination_path))
 
+def get_google_api_session()-> AuthorizedSession:
+    """Create a session object with authorization to do API calls within the specified scope."""
 
-def transcribe(session, name, bucket, destination_path, source_path):
+    credentials = service_account.Credentials.from_service_account_file(
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"],
+    scopes=["https://www.googleapis.com/auth/cloud-platform"],
+    )
+    return AuthorizedSession(credentials)
+
+def transcribe(session: AuthorizedSession, name: str, bucket:str, destination_path: str, source_path: str):
     # 1 construct api call info
     audio_uri = "gs://" + bucket + "/" + source_path + "/" + name + ".flac"
     output_uri = "gs://" + bucket + "/" + destination_path + "/" + name + ".json"
@@ -126,11 +137,38 @@ def transcribe(session, name, bucket, destination_path, source_path):
     # 3. Wait until transcription concluded
     wait_for_transcription(token)
 
+def get_speach_to_text_config(audio_uri, output_uri):
+    """Create config file for the v1p1beta1 longrunning speech to text google API."""
 
-def download(url: str, name: str) -> None:
-    pass
-    # 2.
+    config = {
+        "config": {
+            "language_code": "en-US",
+            "encoding": "FLAC",
+            "audio_channel_count": 1,
+            "enable_automatic_punctuation": True,
+            "enable_word_time_offsets": True,
+        },
+        "audio": {
+            "uri": audio_uri
+        },
+        "outputConfig": {
+            "gcsUri": output_uri
+        },
+    }
 
+    return config
+
+
+def start_transcription(session:AuthorizedSession, config: dict)-> str:
+    """Start transcription of audio file. """
+    resp = authed_session.post(
+        "https://speech.googleapis.com/v1p1beta1/speech:longrunningrecognize",
+        headers={
+            "Content-Type": "application/json; charset=utf-8",
+        },
+        json=gcloud_config,
+    )
+    print(resp)
 
 if __name__ == "__main__":
     main()
