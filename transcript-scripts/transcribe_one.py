@@ -31,7 +31,7 @@ def main():
     # 2. Convert to mono, flac, creating new file.
     flac_file_name = convert_to_flac(file_name, name)
 
-    # 3. Upload flac
+    # 3. Upload flac file to google bucket
     client = get_google_storage_client()
     upload_to_bucket(
         client,
@@ -92,6 +92,26 @@ def convert_to_flac(file_name, name) -> str:
     )
     return name + flac
 
+def get_google_storage_client()
+    """Get a google storage client."""
+    return storage.Client()
+
+def upload_to_bucket(
+    client: storage.Client,
+    file_path: str,
+    bucket_name: str,
+    destination_path: str,
+):
+    """Upload file to google cloud storage bucket."""
+
+    bucket = client.get_bucket(bucket_name)
+    blob = bucket.blob(destination_path)
+
+    print("Uploading...")
+    # TODO fix timeout on upload!!
+    blob.upload_from_filename(file, target_file_path)
+    print("File {} uploaded to {}.".format(file_path, destination_path))
+
 
 def transcribe(session, name, bucket, destination_path, source_path):
     # 1 construct api call info
@@ -113,5 +133,4 @@ def download(url: str, name: str) -> None:
 
 
 if __name__ == "__main__":
-    client = storage.Client()
     main()
