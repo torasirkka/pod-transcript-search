@@ -154,13 +154,8 @@ def transcribe(
     config = get_speach_to_text_config(audio_uri, output_uri)
 
     # 2. Post request, longrunning speech-to-text.
-    token = start_transcription(session, config)
+    start_transcription(session, config)
     print("Transcribing...")
-    print(token)
-    print(type(token))
-
-    # 3. Wait until transcription concluded
-    wait_for_transcription(session, token)
 
 
 def get_speach_to_text_config(audio_uri, output_uri):
@@ -180,7 +175,7 @@ def get_speach_to_text_config(audio_uri, output_uri):
     return config
 
 
-def start_transcription(session: AuthorizedSession, config: dict) -> str:
+def start_transcription(session: AuthorizedSession, config: dict):
     """Start transcription of audio file. """
     resp = session.post(
         "https://speech.googleapis.com/v1p1beta1/speech:longrunningrecognize",
@@ -188,27 +183,8 @@ def start_transcription(session: AuthorizedSession, config: dict) -> str:
             "Content-Type": "application/json; charset=utf-8",
         },
         json=config,
-        timeout=600.0,
     )
-    return resp
-
-
-def wait_for_transcription(session: AuthorizedSession, token: str):
-    """Keep polling the google cloud speech api using token, until the
-    corresponding transcription job is finished."""
-
-    done = False
-    retry_count = 740  # if file transcription not done after 2h, terminate process.
-    while not done and retry_count > 0:
-        time.sleep(10)  # wait 10s between polls
-        print("Still transcribing...")
-        resp = session.get(
-            f"https://speech.googleapis.com/v1p1beta1/operations/name={token}"
-        )
-        done = resp["done"]
-        print(f"Polling response: {resp}")
-
-    print(f"File '{resp.get('name','')}' successfuly uploaded.")
+    print(resp)
 
 
 if __name__ == "__main__":
