@@ -8,42 +8,61 @@ from google.cloud import storage
 from google.oauth2 import service_account
 from google.auth.transport.requests import AuthorizedSession
 
+sys.path.append(
+    "/Users/torasirkka/Documents/Hackbright2021/MyProject/podsearch/backend"
+)
+
+import time
+from typing import List
+
 BUCKET_NAME = "audiofiles-storage"
 AUDIO_FLAC_PATH = "audio-flac"
 TRANSCRIPTION_JSON_PATH = "transcripts"
+USER_PROJECT = "brilliant-flame-314106"
 
 
 def main():
 
+    client = storage.Client()
+
     audio_url = sys.argv[1]
     name = sys.argv[2]
 
-    print(f"Path to resource:{audio_url}")
-    print(f"Unique identifier:{name}")
+    print(f"Path to resource: {audio_url}")
+    print(f"Unique identifier: {name}")
+
+    # preparation: creating filenames needed:
+    transcribed_name = TRANSCRIPTION_JSON_PATH + "/" + name + ".json"
+    flac_bucket_path = AUDIO_FLAC_PATH + "/" + name + ".flac"
 
     # 0. Check if file in bucket. If yes: return None
-    transcribed_name = name + ".json"
+    client = storage.Client()
+
     if file_is_in_bucket(
         client, transcribed_name, BUCKET_NAME, TRANSCRIPTION_JSON_PATH
     ):
+        print(
+            f"Transcribed audio '{transcribed_name}' already exists in bucket '{BUCKET_NAME}'."
+        )
         return
 
-    # 1. Download and rename file. Maintain file ext.
-    file_name = download(audio_url, name)
+    # 1. If flac audio-file not in bucket:
+    #    Download and rename file. Maintain file ext.
+    if not file_is_in_bucket(client, flac_bucket_path, BUCKET_NAME, AUDIO_FLAC_PATH):
+        file_name = download(audio_url, name)
 
-    # 2. Convert to mono, flac, creating new file.
-    flac_file_name = convert_to_flac(file_name, name)
+        # a. Convert to mono, flac, creating new file.
+        flac_file_name = convert_to_flac(file_name, name)
 
-    # 3. Upload flac file to google bucket
-    client = get_google_storage_client()
-    upload_to_bucket(
-        client,
-        flac_file_name,
-        bucket_name=BUCKET_NAME,
-        destination_path=AUDIO_FLAC_PATH,
-    )
+        # b. Upload flac audio file to bucket
+        upload_to_bucket(
+            client,
+            flac_file_name,
+            bucket_name=BUCKET_NAME,
+            destination_path=flac_bucket_path,
+        )
 
-    # 4. transcribe & check transcription is in bucket
+    # 2. transcribe & check transcription is in bucket
     session = get_google_api_session()
     transcribe(session, name, BUCKET_NAME, TRANSCRIPTION_JSON_PATH, AUDIO_FLAC_PATH)
 
@@ -56,14 +75,13 @@ def file_is_in_bucket(
 ) -> bool:
     """Checks if a file with the name file_name is found in the bucket."""
 
-    names = _get_blob_names(client, bucket_name, path)
+    names = get_blob_names(client, bucket_name, path)
     return file_name in names
 
 
-def _get_blob_names(client: storage.Client, bucket_name: str, path: str) -> List[str]:
+def get_blob_names(client: storage.Client, bucket_name: str, path: str) -> List[str]:
     """Get list of all filenames in the bucket."""
-
-    blobs = client.list_blobs(bucket_name, path)
+    blobs = client.list_blobs(bucket_name, prefix=path)
     # Each blob has an attribute 'name', which is the one we are after.
     return [blob.name for blob in blobs]
 
@@ -75,7 +93,7 @@ def download(url: str, name: str) -> str:
 
     file_ext = get_file_ext(url)
     file_name = name + file_ext
-    download_process = subprocess.run(["curl", "-L", "-o", audio_fname, ep.mp3_url])
+    subprocess.run(["curl", "-L", "-o", file_name, url])
 
     return file_name
 
@@ -87,17 +105,13 @@ def get_file_ext(url: str) -> str:
     return file_ext
 
 
-def convert_to_flac(file_name: str, name:str) -> str:
+def convert_to_flac(file_name: str, name: str) -> str:
     """Create new audio file by converting audio in file_name to flac and mono. Name new file name.flac"""
 
-    conversion = subprocess.run(
-        ["ffmpeg", "-y", "-i", audio_fname, "-ac", "1", converted_audio_fname]
-    )
-    return name + flac
+    converted_audio_fname = name + ".flac"
+    subprocess.run(["ffmpeg", "-y", "-i", file_name, "-ac", "1", converted_audio_fname])
+    return converted_audio_fname
 
-def get_google_storage_client()
-    """Get a google storage client."""
-    return storage.Client()
 
 def upload_to_bucket(
     client: storage.Client,
@@ -112,19 +126,27 @@ def upload_to_bucket(
 
     print("Uploading...")
     # TODO fix timeout on upload!!
-    blob.upload_from_filename(file, target_file_path)
+    blob.upload_from_filename(file_path)
     print("File {} uploaded to {}.".format(file_path, destination_path))
 
-def get_google_api_session()-> AuthorizedSession:
+
+def get_google_api_session() -> AuthorizedSession:
     """Create a session object with authorization to do API calls within the specified scope."""
 
     credentials = service_account.Credentials.from_service_account_file(
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"],
-    scopes=["https://www.googleapis.com/auth/cloud-platform"],
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"],
+        scopes=["https://www.googleapis.com/auth/cloud-platform"],
     )
     return AuthorizedSession(credentials)
 
-def transcribe(session: AuthorizedSession, name: str, bucket:str, destination_path: str, source_path: str):
+
+def transcribe(
+    session: AuthorizedSession,
+    name: str,
+    bucket: str,
+    destination_path: str,
+    source_path: str,
+):
     # 1 construct api call info
     audio_uri = "gs://" + bucket + "/" + source_path + "/" + name + ".flac"
     output_uri = "gs://" + bucket + "/" + destination_path + "/" + name + ".json"
@@ -133,9 +155,13 @@ def transcribe(session: AuthorizedSession, name: str, bucket:str, destination_pa
 
     # 2. Post request, longrunning speech-to-text.
     token = start_transcription(session, config)
+    print("Transcribing...")
+    print(token)
+    print(type(token))
 
     # 3. Wait until transcription concluded
-    wait_for_transcription(token)
+    wait_for_transcription(session, token)
+
 
 def get_speach_to_text_config(audio_uri, output_uri):
     """Create config file for the v1p1beta1 longrunning speech to text google API."""
@@ -145,30 +171,49 @@ def get_speach_to_text_config(audio_uri, output_uri):
             "language_code": "en-US",
             "encoding": "FLAC",
             "audio_channel_count": 1,
-            "enable_automatic_punctuation": True,
             "enable_word_time_offsets": True,
         },
-        "audio": {
-            "uri": audio_uri
-        },
-        "outputConfig": {
-            "gcsUri": output_uri
-        },
+        "audio": {"uri": audio_uri},
+        "outputConfig": {"gcsUri": output_uri},
     }
 
     return config
 
 
-def start_transcription(session:AuthorizedSession, config: dict)-> str:
+def start_transcription(session: AuthorizedSession, config: dict) -> str:
     """Start transcription of audio file. """
-    resp = authed_session.post(
+    resp = session.post(
         "https://speech.googleapis.com/v1p1beta1/speech:longrunningrecognize",
         headers={
             "Content-Type": "application/json; charset=utf-8",
         },
-        json=gcloud_config,
+        json=config,
+        timeout=600.0,
     )
-    print(resp)
+    return resp
+
+
+def wait_for_transcription(session: AuthorizedSession, token: str):
+    """Keep polling the google cloud speech api using token, until the
+    corresponding transcription job is finished."""
+
+    done = False
+    retry_count = 740  # if file transcription not done after 2h, terminate process.
+    while not done and retry_count > 0:
+        time.sleep(10)  # wait 10s between polls
+        print("Still transcribing...")
+        resp = session.get(
+            f"https://speech.googleapis.com/v1p1beta1/operations/name={token}"
+        )
+        done = resp["done"]
+        print(f"Polling response: {resp}")
+
+    print(f"File '{resp.get('name','')}' successfuly uploaded.")
+
 
 if __name__ == "__main__":
     main()
+
+# to test: run python3 -i transcribe_one.py "https://cdn.simplecast.com/audio/5c3025/5c302538-714d-4d5d-be74-21d38440ae5c/d915ceb2-0367-4e8c-b2aa-a66944ba4b67/smartless-trailer2-v8a-2-rmix03_tc.mp3?aid=rss_feed&feed=pvzhyDQn" "SmartLessTrailer2SurpriseG94c0d3e3d8004be9acee8b411999dc43"
+# python3 -i transcribe_one.py "https://cdn.simplecast.com/audio/5c3025/5c302538-714d-4d5d-be74-21d38440ae5c/8d7a257c-8a00-41e2-9e1d-a5ca3bae1e5f/smartless-trailer-a1sauce-comp_tc.mp3?aid=rss_feed&feed=pvzhyDQn" "SmartLessTrailer1LaunchTra246f9cf6438442a5af4ac7a11f006821"
+# transcribe(session, 'YoIsThisRacist_sample', BUCKET_NAME,TRANSCRIPTION_JSON_PATH,AUDIO_FLAC_PATH)
