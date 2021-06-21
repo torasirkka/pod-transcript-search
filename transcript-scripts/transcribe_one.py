@@ -11,14 +11,12 @@ from google.auth.transport.requests import AuthorizedSession
 sys.path.append(
     "/Users/torasirkka/Documents/Hackbright2021/MyProject/podsearch/backend"
 )
-
 import time
 from typing import List
 
 BUCKET_NAME = "audiofiles-storage"
 AUDIO_FLAC_PATH = "audio-flac"
 TRANSCRIPTION_JSON_PATH = "transcripts"
-USER_PROJECT = "brilliant-flame-314106"
 
 
 def main():
@@ -64,7 +62,14 @@ def main():
 
     # 2. transcribe & check transcription is in bucket
     session = get_google_api_session()
-    transcribe(session, name, BUCKET_NAME, TRANSCRIPTION_JSON_PATH, AUDIO_FLAC_PATH)
+    token = start_transcription(
+        session, name, BUCKET_NAME, TRANSCRIPTION_JSON_PATH, AUDIO_FLAC_PATH
+    )
+
+    # 3. Wait until transcription done
+
+    wait_for_transcription(session, token)
+    print(f"File '{name}' transcribed.")
 
 
 def file_is_in_bucket(
@@ -140,25 +145,24 @@ def get_google_api_session() -> AuthorizedSession:
     return AuthorizedSession(credentials)
 
 
-def transcribe(
+def start_transcription(
     session: AuthorizedSession,
     name: str,
     bucket: str,
     destination_path: str,
     source_path: str,
-):
+) -> str:
     # 1 construct api call info
     audio_uri = "gs://" + bucket + "/" + source_path + "/" + name + ".flac"
     output_uri = "gs://" + bucket + "/" + destination_path + "/" + name + ".json"
 
-    config = get_speach_to_text_config(audio_uri, output_uri)
+    config = get_speech_to_text_config(audio_uri, output_uri)
 
     # 2. Post request, longrunning speech-to-text.
-    start_transcription(session, config)
-    print("Transcribing...")
+    return _start_transcription(session, config)
 
 
-def get_speach_to_text_config(audio_uri, output_uri):
+def get_speech_to_text_config(audio_uri, output_uri):
     """Create config file for the v1p1beta1 longrunning speech to text google API."""
 
     config = {
@@ -175,7 +179,7 @@ def get_speach_to_text_config(audio_uri, output_uri):
     return config
 
 
-def start_transcription(session: AuthorizedSession, config: dict):
+def _start_transcription(session: AuthorizedSession, config: dict) -> str:
     """Start transcription of audio file. """
     resp = session.post(
         "https://speech.googleapis.com/v1p1beta1/speech:longrunningrecognize",
@@ -184,7 +188,25 @@ def start_transcription(session: AuthorizedSession, config: dict):
         },
         json=config,
     )
-    print(resp)
+    resp_body = resp.json()
+    return resp_body["name"]
+
+
+def wait_for_transcription(session: AuthorizedSession, token: str):
+    """Keep polling the google cloud speech api using token, until the
+    corresponding transcription job is finished."""
+
+    done = False
+    retry_count = 740  # if file transcription not done after 2h, terminate process.
+    while not done and retry_count > 0:
+        url = f"https://speech.googleapis.com/v1p1beta1/operations/{token}"
+        resp = session.get(url)
+        resp_body = resp.json()
+        if resp.status_code != 200:
+            print(resp.status_code, resp.content)
+        done = resp_body.get("done", False)
+        retry_count -= 1
+        time.sleep(10)  # wait 10s between polls
 
 
 if __name__ == "__main__":
