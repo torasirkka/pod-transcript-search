@@ -1,4 +1,5 @@
 """Server for pod transcript app."""
+import os
 from flask import Flask, jsonify, render_template, request, flash, session, redirect
 import model
 import parse_rss
@@ -122,5 +123,10 @@ def add_podcast():
 
 
 if __name__ == "__main__":
+    os.system("dropdb podcasts")
+    os.system("createdb podcasts")
+
     model.connect_to_db(app)
+    model.db.configure_mappers()
+    model.db.create_all()
     app.run(host="0.0.0.0", debug=True)

@@ -1,6 +1,6 @@
 """Python script that parses data from RSS files and adds it to a database"""
 
-from typing import Tuple, Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any
 import podcastparser
 import urllib.request
 import datetime
@@ -39,6 +39,9 @@ def _create_episode_obj(rss_episode_data: Dict) -> model.Episode:
         episode.episode_title = rss_episode_data["title"]
     if "description" in rss_episode_data:
         episode.description = rss_episode_data["description"]
+        # TODO remove this! Replace with transcript
+        search_data = _create_search_obj(rss_episode_data["description"])
+        episode.searchepisode.append(search_data)
     if "published" in rss_episode_data:
         episode.release_date = datetime.date.fromtimestamp(
             rss_episode_data["published"]
@@ -49,6 +52,14 @@ def _create_episode_obj(rss_episode_data: Dict) -> model.Episode:
         episode.guid = rss_episode_data["guid"]
 
     return episode
+
+
+def _create_search_obj(s: str) -> model.SearchEpisode:
+    """Create a vector object."""
+
+    searchepisode = model.SearchEpisode()
+    searchepisode.transcript = s
+    return searchepisode
 
 
 def _parse_episode_mp3_url(enclosures: List[Dict]) -> Optional[str]:
@@ -86,21 +97,22 @@ if __name__ == "__main__":
     from server import app
     import server
 
-    os.system("dropdb podcasts")
-    os.system("createdb podcasts")
+    # os.system("dropdb podcasts")
+    # os.system("createdb podcasts")
 
     model.connect_to_db(server.app)
-    model.db.create_all()
-    # file = open("RSS_feeds.txt")
+    # model.db.configure_mappers()
+    # model.db.create_all()
+    # # file = open("RSS_feeds.txt")
     # i = 0
     # for rss_url in file:
     #     podcast = to_podcasts_and_episodes(rss_url)
     #     objects_list = [podcast] + podcast.episodes
     #     print(objects_list)
     #     model.db.session.add_all(objects_list)
-    #     print('*'*40)
-    #     print('')
-    #     print(f'RSS feed nr {i}')
+    #     print("*" * 40)
+    #     print("")
+    #     print(f"RSS feed nr {i}")
     #     i += 0
-    model.db.session.commit()
+    # model.db.session.commit()
     print("success!")

@@ -1,14 +1,15 @@
 """Models for podcast transcript search app."""
 
-from typing import Optional, Dict, Any
-from datetime import datetime
 import re
 from functools import cached_property
 
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.dialects.postgresql import JSON
+from flask_sqlalchemy import SQLAlchemy, BaseQuery
+from sqlalchemy_searchable import SearchQueryMixin
+from sqlalchemy_utils.types import TSVectorType
+from sqlalchemy_searchable import make_searchable
 
 db = SQLAlchemy()
+make_searchable(db.metadata)
 
 
 class Podcast(db.Model):
@@ -46,39 +47,62 @@ class Episode(db.Model):
     status = db.Column(db.String)
     guid = db.Column(db.String)
 
+    searchepisode = db.relationship("SearchEpisode", backref="episode")
+
     def __repr__(self):
         return (
             f"<Episode episode_id={self.episode_id} episode_title={self.episode_title}>"
         )
 
-    @cached_property
-    def fname(self) -> str:
-        """Hash fn that generates a unique fname for a podcast episode.
 
-        This is the filename for the transcriptions cache stored used as back-up.
-        It consists of the first 15 chars of the podcast and episode titles + the
-        32 last episode uuid chars.
-        """
-
-        # TODO: check out https://docs.python.org/3/library/functools.html#functools.cached_property
-
-        # WARNING: LEGAL_FILENAME_CHARS is used in hash fn to generate unique ids. DO NOT ALTER! May cause
-        # transcription of files already transcribed!
-        LEGAL_FILENAME_CHARS = r"[a-zA-Z0-9]"
-
-        def only_legal_chars(s: str) -> str:
-            return "".join([char for char in s if re.match(LEGAL_FILENAME_CHARS, char)])
-
-        pod_title = only_legal_chars(self.podcast.title)
-        ep_title = only_legal_chars(self.episode_title)
-        ep_guid = only_legal_chars(self.guid)
-
-        return pod_title[:17] + ep_title[:17] + ep_guid[-32:]
+class SearchEpisodeQuery(BaseQuery, SearchQueryMixin):
+    pass
 
 
-def connect_to_db(flask_app, db_uri="postgresql:///podcasts", echo=True):
+class SearchEpisode(db.Model):
+    """The information to be searched in an episode."""
+
+    query_class = SearchEpisodeQuery
+    __tablename__ = "searchepisodes"
+
+    searchepisodes_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    episode_id = db.Column(
+        db.Integer, db.ForeignKey("episodes.episode_id"), unique=True, nullable=False
+    )
+    transcript = db.Column(db.Text)
+    searchepisodes_vector = db.Column(TSVectorType("transcript"))
+
+    def __repr__(self):
+        return f"<Searchepisode searchepisodes_id={self.searchepisodes_id}>"
+
+
+def fname(ep: Episode) -> str:
+    """Hash fn that generates a unique fname for a podcast episode.
+
+    This is the filename for the transcriptions cache stored used as back-up.
+    It consists of the first 15 chars of the podcast and episode titles + the
+    32 last episode uuid chars.
+    """
+
+    # TODO: check out https://docs.python.org/3/library/functools.html#functools.cached_property
+
+    # WARNING: LEGAL_FILENAME_CHARS is used in hash fn to generate unique ids. DO NOT ALTER! May cause
+    # transcription of files already transcribed!
+    LEGAL_FILENAME_CHARS = r"[a-zA-Z0-9]"
+
+    def only_legal_chars(s: str) -> str:
+        return "".join([char for char in s if re.match(LEGAL_FILENAME_CHARS, char)])
+
+    pod_title = only_legal_chars(ep.podcast.title)
+    ep_title = only_legal_chars(ep.episode_title)
+    ep_guid = only_legal_chars(ep.guid)
+
+    return pod_title[:17] + ep_title[:17] + ep_guid[-32:]
+
+
+def connect_to_db(flask_app, db_uri="postgresql:///podcasts"):
     flask_app.config["SQLALCHEMY_DATABASE_URI"] = db_uri
-    flask_app.config["SQLALCHEMY_ECHO"] = echo
+    # flask_app.config["SQLALCHEMY_ECHO"] = echo
     flask_app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     db.app = flask_app
@@ -86,6 +110,8 @@ def connect_to_db(flask_app, db_uri="postgresql:///podcasts", echo=True):
 
     print("Connected to the db!")
 
+
+db.configure_mappers()
 
 if __name__ == "__main__":
     from server import app
