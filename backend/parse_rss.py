@@ -28,6 +28,8 @@ def _create_podcast_obj(rss_data: Dict[Any, Any]) -> model.Podcast:
         for episode in rss_data["episodes"]:
             ep_obj = _create_episode_obj(episode)
             podcast.episodes.append(ep_obj)
+            searchepisode_obj = _create_search_obj(ep_obj)
+            ep_obj.searchepisode.append(searchepisode_obj)
 
     return podcast
 
@@ -39,9 +41,6 @@ def _create_episode_obj(rss_episode_data: Dict) -> model.Episode:
         episode.episode_title = rss_episode_data["title"]
     if "description" in rss_episode_data:
         episode.description = rss_episode_data["description"]
-        # TODO remove this! Replace with transcript
-        search_data = _create_search_obj(rss_episode_data["description"])
-        episode.searchepisode.append(search_data)
     if "published" in rss_episode_data:
         episode.release_date = datetime.date.fromtimestamp(
             rss_episode_data["published"]
@@ -54,11 +53,12 @@ def _create_episode_obj(rss_episode_data: Dict) -> model.Episode:
     return episode
 
 
-def _create_search_obj(s: str) -> model.SearchEpisode:
+def _create_search_obj(ep: model.Episode) -> model.SearchEpisode:
     """Create a vector object."""
 
     searchepisode = model.SearchEpisode()
-    searchepisode.transcript = s
+    searchepisode.description = ep.description
+    searchepisode.title = ep.episode_title
     return searchepisode
 
 
