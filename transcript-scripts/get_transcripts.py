@@ -32,7 +32,7 @@ def main():
     existing_transcripts = get_blob_names(client, BUCKET_NAME, TRANSCRIPTION_JSON_PATH)
 
     for ep in episodes:
-        transcribed_name = TRANSCRIPTION_JSON_PATH + "/" + ep.fname + ".json"
+        transcribed_name = TRANSCRIPTION_JSON_PATH + "/" + model.cache_id(ep) + ".json"
 
         if transcribed_name in existing_transcripts:
             print(ep)

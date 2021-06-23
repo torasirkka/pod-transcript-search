@@ -76,8 +76,8 @@ class SearchEpisode(db.Model):
         return f"<Searchepisode searchepisodes_id={self.searchepisodes_id}>"
 
 
-def fname(ep: Episode) -> str:
-    """Hash fn that generates a unique fname for a podcast episode.
+def cache_id(ep: Episode) -> str:
+    """Hash fn that generates a unique cache id for a podcast episode.
 
     This is the filename for the transcriptions cache stored used as back-up.
     It consists of the first 15 chars of the podcast and episode titles + the
