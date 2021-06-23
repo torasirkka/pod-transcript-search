@@ -1,8 +1,6 @@
 """Models for podcast transcript search app."""
 
 import re
-from functools import cached_property
-
 from flask_sqlalchemy import SQLAlchemy, BaseQuery
 from sqlalchemy_searchable import SearchQueryMixin
 from sqlalchemy_utils.types import TSVectorType
@@ -43,7 +41,7 @@ class Episode(db.Model):
     description = db.Column(db.Text)
     release_date = db.Column(db.DateTime)
     mp3_url = db.Column(db.String)
-    transcript = db.Column(db.JSON)
+    transcript = db.Column(db.Text)
     status = db.Column(db.String)
     guid = db.Column(db.String)
 
@@ -70,7 +68,11 @@ class SearchEpisode(db.Model):
         db.Integer, db.ForeignKey("episodes.episode_id"), unique=True, nullable=False
     )
     transcript = db.Column(db.Text)
-    searchepisodes_vector = db.Column(TSVectorType("transcript"))
+    description = db.Column(db.Text)
+    title = db.Column(db.Text)
+    searchepisodes_vector = db.Column(
+        TSVectorType("transcript", "description", "title")
+    )
 
     def __repr__(self):
         return f"<Searchepisode searchepisodes_id={self.searchepisodes_id}>"
