@@ -2,6 +2,7 @@
 from operator import mod
 import os
 from flask import Flask, jsonify, render_template, request, flash, session, redirect
+from sqlalchemy.orm import joinedload
 import model
 import parse_rss
 import urllib
@@ -59,9 +60,12 @@ def get_podcast_episodes(podcast_id):
     if not query:
         episodes = [ep_dict(ep) for ep in pod.episodes]
     else:
-        search_res = model.SearchEpisode.query.search(query).all()
-        episode_ids = [res.episode_id for res in search_res]
-        episodes = [ep_dict(model.Episode.query.get(i)) for i in episode_ids]
+        searchepisodes = (
+            model.SearchEpisode.query.search(query)
+            .options(joinedload(model.SearchEpisode.episode))
+            .all()
+        )
+        episodes = [ep_dict(ep) for searchepisodes.episode in searchepisodes]
 
     return jsonify(episodes)
 
@@ -127,9 +131,6 @@ def ep_dict(ep: model.Episode):
 
 
 if __name__ == "__main__":
-    #    os.system("dropdb podcasts")
-    #   os.system("createdb podcasts")
-
     model.connect_to_db(app)
     model.db.configure_mappers()
     model.db.create_all()
