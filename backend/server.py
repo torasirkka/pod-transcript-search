@@ -65,8 +65,7 @@ def get_podcast_episodes(podcast_id):
             .options(joinedload(model.SearchEpisode.episode))
             .all()
         )
-        episodes = [ep_dict(ep) for searchepisodes.episode in searchepisodes]
-
+        episodes = [ep_dict(searchep.episode) for searchep in searchepisodes]
     return jsonify(episodes)
 
 

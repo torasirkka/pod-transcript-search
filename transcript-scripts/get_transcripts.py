@@ -32,17 +32,21 @@ def main():
         transcribed_name = TRANSCRIPTION_JSON_PATH + "/" + model.cache_id(ep) + ".json"
 
         if transcribed_name in existing_transcripts:
-            print(ep)
-            transcript = download_transcript(
+            transcript_dict = download_transcript(
                 client,
                 transcribed_name,
                 BUCKET_NAME,
             )
-            print(transcript)
-            ep.transcript = transcript
-            model.db.session.add(ep)
 
+            transcript = extract_transcript(transcript_dict)
+
+            ep.transcript = transcript
+            ep.searchepisode[0].transcript = transcript
+
+        model.db.session.add(ep)
+        model.db.session.add(ep.searchepisode[0])
     model.db.session.commit()
+    return
 
 
 def get_blob_names(client: storage.Client, bucket_name: str, path: str) -> List[str]:
@@ -66,40 +70,6 @@ def download_transcript(
     return json.loads(data)
 
 
-def test():
-    # Find episodes that have no transcript
-    episodes = (
-        model.Episode.query.filter_by(transcript=None)
-        .options(joinedload(model.Episode.podcast))
-        .all()
-    )
-
-    # Loop through episodes and check if transcript exists in bucket.
-    # If it does: download and commit it to database.
-    client = storage.Client()
-    existing_transcripts = get_blob_names(client, BUCKET_NAME, TRANSCRIPTION_JSON_PATH)
-
-    for ep in episodes:
-        transcribed_name = TRANSCRIPTION_JSON_PATH + "/" + model.cache_id(ep) + ".json"
-
-        if transcribed_name in existing_transcripts:
-            transcript_dict = download_transcript(
-                client,
-                transcribed_name,
-                BUCKET_NAME,
-            )
-
-            transcript = extract_transcript(transcript_dict)
-
-            ep.transcript = transcript
-            ep.searchepisode[0].transcript = transcript
-
-        model.db.session.add(ep)
-        model.db.session.add(ep.searchepisode[0])
-    model.db.session.commit()
-    return
-
-
 def extract_transcript(transcript: Dict) -> str:
     """Extract the transcript from the response returned by Google speech API."""
 
@@ -117,5 +87,4 @@ def extract_transcript(transcript: Dict) -> str:
 
 if __name__ == "__main__":
     model.connect_to_db(server.app)
-    # main()
-    test()
+    main()
