@@ -89,55 +89,25 @@ def test():
                 BUCKET_NAME,
             )
 
-            # string to be assigned
             transcript = extract_transcript(transcript_dict)
 
-            # ep is the object (row in the episodes table)
-            # ep has an attribute transcript that I assign to 'transcript'
             ep.transcript = transcript
-            print(ep.transcript[:50])
-            print("-" * 30)
-            # Next I check the searchepisode object that I access through its relation to ep.
-            # searchepisode has an attribute transript that I want to assign a value to.
-            print(ep.searchepisode[0])
-            # First, I print the current value
-            print(ep.searchepisode[0].transcript)
-            # Then I assign a value to it
-            ep.searchepisode[0].transcipt = transcript
-            # Finally I print to confirm the update.
-            print(ep.searchepisode[0].transcript)
-            print("*" * 30)
-            print("")
+            ep.searchepisode[0].transcript = transcript
 
-            # To troubleshoot I try updating the attribute description on the searchepisode object.
-            print(ep.searchepisode[0].description)
-            ep.searchepisode[0].decsription = transcript
-            print("After re-assignment")
-            print(ep.searchepisode[0].description)
-
-            return transcript
-
-            model.db.session.add(ep)
-
-            model.db.session.commit()
-            # Each result is for a consecutive portion of the audio. Iterate through
-            # them to get the transcripts for the entire audio file.
-            # for result in transcript["results"]:
-            # The first alternative is the most likely one for this portion.
-            #   print(u"Transcript: {}".format(result.alternatives[0].transcript))
-
-            # p.transcript = transcript
-            # print(ep.episode_id)
-            # return ep
+        model.db.session.add(ep)
+        model.db.session.add(ep.searchepisode[0])
+    model.db.session.commit()
+    return
 
 
 def extract_transcript(transcript: Dict) -> str:
     """Extract the transcript from the response returned by Google speech API."""
 
-    # Each audio file is broken into snippets transcribed and stored separately.
-    # In addition to the transcript each snippet is a list of dicts containing
-    # meta data and words offset data.
-    # Loop through transcription file to extract and combine transcript one text.
+    # Each audio file is broken into snippets whose consecutive transcriptsare stored
+    # in a list under the key "results". Each snippet is a dict containing meta data
+    # and words offset data in addition to the transcript under the key "transcript".
+    # Loop through the list of snippetsto extract and combine the transcripts to one
+    # text.
     print("Number of snippets: ", len(transcript["results"]))
     snippets = []
     for snippet in transcript["results"]:
