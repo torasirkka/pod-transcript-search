@@ -1,8 +1,7 @@
 import sys
-import re
 
 sys.path.append(
-    "/Users/torasirkka/Documents/Hackbright2021/MyProject/podsearch/backend"
+    "/Users/torasirkka/Documents/Hackbright2021/MyProject/pod-transcript-search/backend"
 )
 import model
 import server
