@@ -43,10 +43,12 @@ def main():
             ep.transcript = transcript
             ep.searchepisode[0].transcript = transcript
 
-        model.db.session.add(ep)
-        model.db.session.add(ep.searchepisode[0])
+            model.db.session.add(ep)
+            model.db.session.add(ep.searchepisode[0])
+            print(
+                f"Added transcript to episode {ep.episode_title} and searchepisode {ep.searchepisode[0].searchepisodes_id}"
+            )
     model.db.session.commit()
-    return
 
 
 def get_blob_names(client: storage.Client, bucket_name: str, path: str) -> List[str]:
