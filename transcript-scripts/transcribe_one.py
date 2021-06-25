@@ -113,9 +113,11 @@ def get_file_ext(url: str) -> str:
 def convert_to_flac(file_name: str, name: str) -> str:
     """Create new audio file by converting audio in file_name to flac and mono. Name new file name.flac"""
 
-    converted_audio_fname = name + ".flac"
-    subprocess.run(["ffmpeg", "-y", "-i", file_name, "-ac", "1", converted_audio_fname])
-    return converted_audio_fname
+    converted_audio_cache_id = name + ".flac"
+    subprocess.run(
+        ["ffmpeg", "-y", "-i", file_name, "-ac", "1", converted_audio_cache_id]
+    )
+    return converted_audio_cache_id
 
 
 def upload_to_bucket(

@@ -1,5 +1,8 @@
 """Server for pod transcript app."""
+from operator import mod
+import os
 from flask import Flask, jsonify, render_template, request, flash, session, redirect
+from sqlalchemy.orm import joinedload
 import model
 import parse_rss
 import urllib
@@ -53,25 +56,16 @@ def get_podcast_episodes(podcast_id):
     pod = model.Podcast.query.get(podcast_id)
     query = request.args.get("q", "")
 
-    # create list of dicts with episode information:
-    episodes = []
-    for ep in pod.episodes:
-        ep_data = {
-            "id": ep.episode_id,
-            "title": ep.episode_title,
-            "description": ep.description,
-            "published": ep.release_date,
-            "mp3_url": ep.mp3_url,
-            "transcript": ep.transcript,
-            "status": ep.status,
-            "guid": ep.guid,
-        }
-
-        if not query:
-            episodes.append(ep_data)
-        else:
-            if query in ep_data["description"]:
-                episodes.append(ep_data)
+    # create list of episode dicts to be returned:
+    if not query:
+        episodes = [ep_dict(ep) for ep in pod.episodes]
+    else:
+        searchepisodes = (
+            model.SearchEpisode.query.search(query)
+            .options(joinedload(model.SearchEpisode.episode))
+            .all()
+        )
+        episodes = [ep_dict(searchep.episode) for searchep in searchepisodes]
     return jsonify(episodes)
 
 
@@ -121,6 +115,22 @@ def add_podcast():
         return podcast
 
 
+def ep_dict(ep: model.Episode):
+    """Turn an episode object into a dictionary."""
+    return {
+        "id": ep.episode_id,
+        "title": ep.episode_title,
+        "description": ep.description,
+        "published": ep.release_date,
+        "mp3_url": ep.mp3_url,
+        "transcript": ep.transcript,
+        "status": ep.status,
+        "guid": ep.guid,
+    }
+
+
 if __name__ == "__main__":
     model.connect_to_db(app)
+    model.db.configure_mappers()
+    model.db.create_all()
     app.run(host="0.0.0.0", debug=True)

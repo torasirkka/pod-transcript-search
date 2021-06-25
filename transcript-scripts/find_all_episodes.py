@@ -1,7 +1,7 @@
 import sys
 
 sys.path.append(
-    "/Users/torasirkka/Documents/Hackbright2021/MyProject/podsearch/backend"
+    "/Users/torasirkka/Documents/Hackbright2021/MyProject/pod-transcript-search/backend"
 )
 import model
 import server
@@ -18,7 +18,7 @@ def main():
 
     print("#!/bin/bash")
     for ep in episodes:
-        print(f"python3 transcribe_one.py '{ep.mp3_url}' '{ep.fname}'")
+        print(f"python3 transcribe_one.py '{ep.mp3_url}' '{model.cache_id(ep)}'")
 
 
 if __name__ == "__main__":
