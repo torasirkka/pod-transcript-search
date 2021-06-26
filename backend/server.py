@@ -21,7 +21,7 @@ app = Flask(__name__)
 def get_podcasts_json():
     """Return a JSON response with all podcasts in db."""
 
-    pods = model.Podcast.query.all()
+    pods = model.Podcast.query.order_by(model.Podcast.title).all()
     podcasts = []
     for pod in pods:
         podcast = {
@@ -68,7 +68,7 @@ def get_podcast_episodes(podcast_id):
         episodes = [
             ep_dict(searchep.episode)
             for searchep in searchepisodes
-            if searchep.episode in pod.episodes
+            if searchep.episode.podcast_id == podcast_id
         ]
     return jsonify(episodes)
 
@@ -127,8 +127,6 @@ def ep_dict(ep: model.Episode):
         "description": ep.description,
         "published": ep.release_date,
         "mp3_url": ep.mp3_url,
-        "transcript": ep.transcript,
-        "status": ep.status,
         "guid": ep.guid,
     }
 
