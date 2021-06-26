@@ -70,7 +70,6 @@ def get_podcast_episodes(podcast_id):
             for searchep in searchepisodes
             if searchep.episode in pod.episodes
         ]
-        console.log(episodes, query)
     return jsonify(episodes)
 
 
