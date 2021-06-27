@@ -2,6 +2,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { Link, useParams } from "react-router-dom";
 import { generatePath } from 'react-router';
+import Card from 'react-bootstrap/Card'
 
 export function Podcasts()
 {
@@ -37,10 +38,8 @@ function PodcastList(props)
 function PodcastListItem(props)
 {
     return (
-        <div className="card shadow p-3 overflow" style={{ width: 10 + 'em' }} >
-            <div className="overflow">
-                <img src={props.podcast.img_url} alt={'Podcast cover art'} className="card-img-top" />
-            </div>
+        <div className="card shadow p-3" style={{ width: 10 + 'em' }} >
+            <img src={props.podcast.img_url} alt={'Podcast cover art'} className="card-img-top" />
             <div className="card-body">
                 <Link to={generatePath("/podcast/:id", { id: props.podcast.id })} className="stretched-link">{props.podcast.title}</Link>
             </div >
@@ -94,7 +93,6 @@ function PodcastHeader(props)
     return (
         <div className="row">
             <h2>{props.podcast.title}</h2>
-            <p>{props.podcast.description}</p>
             <img src={props.podcast.img_url} alt={'Podcast cover art'} className="pod-art" />
         </div >
     )
@@ -132,7 +130,7 @@ function EpisodeListItem(props)
     console.log(props.episode.published)
     return (
         <div>
-            <h3>{props.episode.title}</h3>
+            <h4>{props.episode.title}</h4>
             <p>{props.episode.published}</p>
             <p>{props.episode.description}</p>
         </div>

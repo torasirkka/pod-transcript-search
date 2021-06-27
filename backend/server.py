@@ -125,7 +125,7 @@ def ep_dict(ep: model.Episode):
         "id": ep.episode_id,
         "title": ep.episode_title,
         "description": ep.description,
-        "published": ep.release_date,
+        "published": ep.release_date.date(),
         "mp3_url": ep.mp3_url,
         "guid": ep.guid,
     }

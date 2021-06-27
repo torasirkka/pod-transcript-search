@@ -33,6 +33,10 @@
   padding: 0px;
 }
 
+.pod-art{
+  width: 150px;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
