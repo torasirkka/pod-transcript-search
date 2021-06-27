@@ -48,6 +48,16 @@
   max-width: 150px;
 }
 
+.date-font{
+  color:#666;
+  line-height: 8px;
+
+}
+
+.pod-container{
+  max-width: 970px;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

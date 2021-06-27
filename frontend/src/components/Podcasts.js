@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react';
 import { Link, useParams } from "react-router-dom";
 import { generatePath } from 'react-router';
 import Image from 'react-bootstrap/Image';
-import Col from 'react-bootstrap/Col';
-import Row from 'react-bootstrap/Row'
-import Form from 'react-bootstrap/Form'
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Form from 'react-bootstrap/Form';
+import InputGroup from 'react-bootstrap/InputGroup'
 
 export function Podcasts()
 {
@@ -81,11 +82,13 @@ export function PodcastContainer()
     }
 
     return (
-        <div className="container">
-            <PodcastHeader podcast={podcast} />
-            <SearchEpisodes query={query} setQuery={setQuery} />
-            <EpisodeList episodes={episodes} query={query} />
-        </div>
+        <Container className="pod-container">
+            <Row>
+                <PodcastHeader podcast={podcast} />
+                <SearchEpisodes query={query} setQuery={setQuery} />
+                <EpisodeList episodes={episodes} query={query} />
+            </Row>
+        </Container >
     );
 }
 
@@ -121,21 +124,20 @@ function SearchEpisodes(props)
         props.setQuery(e.target.value)
     }
     return (
-        <div className="mt-10 mb-10" >
-            <Row> </Row>
-            <Form>
-                <Form.Group controlId="formSearchEpisodeContent">
+        <Row >
+            <div className="mt-10 mb-10" >
+                <InputGroup className="shadow">
                     <Form.Control type="search" placeholder="Search..." value={props.query} onChange={handleChange} />
-                </Form.Group>
-            </Form>
-        </div>
+                </InputGroup>
+            </div>
+        </Row>
     );
 }
 
 function EpisodeList(props)
 {
     return (
-        <div className="row" key={props.query}>
+        <div key={props.query}>
             {props.episodes.map(
                 ep => <EpisodeListItem key={ep.id} episode={ep} />
             )}
@@ -145,7 +147,6 @@ function EpisodeList(props)
 
 function EpisodeListItem(props)
 {
-    console.log(props.episode.published)
     return (
         <div>
             <h4>{props.episode.title}</h4>
