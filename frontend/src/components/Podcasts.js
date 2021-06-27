@@ -2,7 +2,10 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { Link, useParams } from "react-router-dom";
 import { generatePath } from 'react-router';
-import Card from 'react-bootstrap/Card'
+import Image from 'react-bootstrap/Image';
+import Col from 'react-bootstrap/Col';
+import Row from 'react-bootstrap/Row'
+import Form from 'react-bootstrap/Form'
 
 export function Podcasts()
 {
@@ -38,11 +41,9 @@ function PodcastList(props)
 function PodcastListItem(props)
 {
     return (
-        <div className="card shadow p-3" style={{ width: 10 + 'em' }} >
-            <img src={props.podcast.img_url} alt={'Podcast cover art'} className="card-img-top" />
-            <div className="card-body">
-                <Link to={generatePath("/podcast/:id", { id: props.podcast.id })} className="stretched-link">{props.podcast.title}</Link>
-            </div >
+        <div className="card shadow" style={{ width: 10 + 'em' }} >
+            <img src={props.podcast.img_url} alt={props.podcast.title} className="card-img-top rounded" />
+            <Link to={generatePath("/podcast/:id", { id: props.podcast.id })} className="stretched-link"></Link>
         </div>
     )
 }
@@ -91,10 +92,25 @@ export function PodcastContainer()
 function PodcastHeader(props)
 {
     return (
-        <div className="row">
-            <h2>{props.podcast.title}</h2>
-            <img src={props.podcast.img_url} alt={'Podcast cover art'} className="pod-art" />
-        </div >
+        <Row >
+            <div style={{ width: '700px' }}>
+                <div className="row no-gutters">
+                    <div className="col xs:{5}">
+                        <Image
+                            src={props.podcast.img_url}
+                            alt={'Podcast cover art'}
+                            className="rounded pod-header" />
+                    </div>
+                    <div className="col-md-9">
+                        <div className="card-body">
+                            <h2>{props.podcast.title}</h2>
+                            <p>{props.podcast.description}</p>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Row >
     )
 }
 
@@ -105,11 +121,13 @@ function SearchEpisodes(props)
         props.setQuery(e.target.value)
     }
     return (
-        <div className="container">
-            <label>
-                Search episodes:
-                <input type="text" value={props.query} onChange={handleChange} />
-            </label>
+        <div className="mt-10 mb-10" >
+            <Row> </Row>
+            <Form>
+                <Form.Group controlId="formSearchEpisodeContent">
+                    <Form.Control type="search" placeholder="Search..." value={props.query} onChange={handleChange} />
+                </Form.Group>
+            </Form>
         </div>
     );
 }

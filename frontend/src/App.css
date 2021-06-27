@@ -36,6 +36,17 @@
 .pod-art{
   width: 150px;
 }
+.mt-10 {
+  margin-top: 10px !important;
+}
+.mb-10{
+  margin-bottom: 10px !important;
+}
+
+.pod-header{
+  width: 100%;
+  max-width: 150px;
+}
 
 @keyframes App-logo-spin {
   from {
