@@ -17,7 +17,7 @@ export function Podcasts()
         );
     }, []);
     return (
-        <div className='podcasts'>
+        <div className="container">
             <PodcastList podcasts={podcasts} />
         </div>
     );
@@ -26,15 +26,27 @@ export function Podcasts()
 function PodcastList(props)
 {
     return (
-        <ul>
+        <div className="row">
             {props.podcasts.map(podcast =>
-                <li key={podcast.title}>
-                    <Link to={generatePath("/podcast/:id", { id: podcast.id })}>{podcast.title}</Link>
-                </li>
+                <PodcastListItem podcast={podcast} key={podcast.id} />
             )}
-        </ul>
+        </div>
     )
 };
+
+function PodcastListItem(props)
+{
+    return (
+        <div className="card shadow p-3 overflow" style={{ width: 10 + 'em' }} >
+            <div className="overflow">
+                <img src={props.podcast.img_url} alt={'Podcast cover art'} className="card-img-top" />
+            </div>
+            <div className="card-body">
+                <Link to={generatePath("/podcast/:id", { id: props.podcast.id })} className="stretched-link">{props.podcast.title}</Link>
+            </div >
+        </div>
+    )
+}
 
 export function PodcastContainer()
 {
@@ -69,7 +81,7 @@ export function PodcastContainer()
     }
 
     return (
-        <div>
+        <div className="container">
             <PodcastHeader podcast={podcast} />
             <SearchEpisodes query={query} setQuery={setQuery} />
             <EpisodeList episodes={episodes} query={query} />
@@ -80,10 +92,10 @@ export function PodcastContainer()
 function PodcastHeader(props)
 {
     return (
-        <div className='podcast-details'>
+        <div className="row">
             <h2>{props.podcast.title}</h2>
             <p>{props.podcast.description}</p>
-            <img src={props.podcast.img_url} alt={'Podcast cover art'} width={100} />
+            <img src={props.podcast.img_url} alt={'Podcast cover art'} className="pod-art" />
         </div >
     )
 }
@@ -95,17 +107,19 @@ function SearchEpisodes(props)
         props.setQuery(e.target.value)
     }
     return (
-        <label>
-            Search episodes:
-            <input type="text" value={props.query} onChange={handleChange} />
-        </label>
+        <div className="container">
+            <label>
+                Search episodes:
+                <input type="text" value={props.query} onChange={handleChange} />
+            </label>
+        </div>
     );
 }
 
 function EpisodeList(props)
 {
     return (
-        <div key={props.query} className='episodes-list'>
+        <div className="row" key={props.query}>
             {props.episodes.map(
                 ep => <EpisodeListItem key={ep.id} episode={ep} />
             )}
@@ -115,11 +129,12 @@ function EpisodeList(props)
 
 function EpisodeListItem(props)
 {
+    console.log(props.episode.published)
     return (
         <div>
             <h3>{props.episode.title}</h3>
+            <p>{props.episode.published}</p>
             <p>{props.episode.description}</p>
-            <p>{props.episode.transcript}</p>
         </div>
     );
 }
