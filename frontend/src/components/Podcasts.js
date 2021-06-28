@@ -6,7 +6,9 @@ import Image from 'react-bootstrap/Image';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Form from 'react-bootstrap/Form';
-import InputGroup from 'react-bootstrap/InputGroup'
+import InputGroup from 'react-bootstrap/InputGroup';
+import ListGroup from 'react-bootstrap/ListGroup';
+import Navbar from 'react-bootstrap/Navbar'
 
 export function Podcasts()
 {
@@ -83,6 +85,9 @@ export function PodcastContainer()
 
     return (
         <Container className="pod-container">
+            <Navbar >
+                <Navbar.Brand href="/podcasts" className="text-muted fw-light lh-1">All podcasts</Navbar.Brand>
+            </Navbar>
             <PodcastHeader podcast={podcast} />
             <SearchEpisodes query={query} setQuery={setQuery} />
             <EpisodeList episodes={episodes} query={query} />
@@ -94,7 +99,7 @@ function PodcastHeader(props)
 {
     return (
         <Row >
-            <div style={{ width: '700px' }}>
+            <div className="pod-header-width">
                 <div className="row no-gutters">
                     <div className="col xs:{5}">
                         <Image
@@ -114,6 +119,7 @@ function PodcastHeader(props)
         </Row >
     )
 }
+
 
 function SearchEpisodes(props)
 {
@@ -135,21 +141,21 @@ function SearchEpisodes(props)
 function EpisodeList(props)
 {
     return (
-        <div key={props.query}>
+        <ListGroup className="bg-gradient-dark" variant="flush" key={props.query}>
             {props.episodes.map(
                 ep => <EpisodeListItem key={ep.id} episode={ep} />
             )}
-        </div >
+        </ListGroup>
     );
 }
 
 function EpisodeListItem(props)
 {
     return (
-        <div>
-            <h4>{props.episode.title}</h4>
-            <p>{props.episode.published}</p>
-            <p>{props.episode.description}</p>
-        </div>
+        <ListGroup.Item className="bg-transparent pl-0">
+            <h5 className="">{props.episode.title}</h5>
+            <p className="text-muted fw-light lh-1">{props.episode.published}</p>
+            <p className="">{props.episode.description}</p>
+        </ListGroup.Item>
     );
 }

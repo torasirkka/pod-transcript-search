@@ -3,8 +3,7 @@ import
 {
   BrowserRouter as Router,
   Switch,
-  Route,
-  Link,
+  Route
 } from "react-router-dom";
 
 import './App.css';
@@ -16,20 +15,15 @@ export function App()
 {
   return (
     <Router>
-      <div>
-        <p>
-          <Link to="/podcasts">Podcasts</Link>
-        </p>
-        <hr />
-        <Switch>
-          <Route path="/podcasts">
-            <Podcasts />
-          </Route>
-          <Route path="/podcast/:id">
-            <PodcastContainer />
-          </Route>
-        </Switch>
-      </div>
+      {/* <Link to="/podcasts">Podcasts</Link> */}
+      <Switch>
+        <Route path="/podcasts">
+          <Podcasts />
+        </Route>
+        <Route path="/podcast/:id">
+          <PodcastContainer />
+        </Route>
+      </Switch>
     </Router >
   );
 }

@@ -42,6 +42,9 @@
 .mb-10{
   margin-bottom: 10px !important;
 }
+.mb-0{
+  margin-bottom: 0;
+}
 
 .pod-header{
   width: 100%;
@@ -53,12 +56,18 @@
   line-height: 8px;
 }
 
-.pod-container{
-  max-width: 970px;
-}
 
+.pod-container{
+  max-width: 870px;
+}
+.pod-header-width{
+  width: 780px;
+}
 .pad-0{
   padding: 0;
+}
+.pl-0{
+  padding-left: 0;
 }
 
 @keyframes App-logo-spin {
