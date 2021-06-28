@@ -7,9 +7,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
-import InputGroup from 'react-bootstrap/InputGroup';
 import ListGroup from 'react-bootstrap/ListGroup';
-import Navbar from 'react-bootstrap/Navbar'
 
 export function Podcasts()
 {
@@ -88,24 +86,10 @@ export function PodcastContainer()
 
     return (
         <Container className="pod-container">
-            <NavbarHeader />
             <PodcastHeader podcast={podcast} />
             <SearchEpisodes query={query} setQuery={setQuery} />
             <EpisodeList episodes={episodes} query={query} />
         </Container >
-    );
-}
-
-function NavbarHeader()
-{
-    return (
-        <Row>
-            <Col>
-                <Navbar >
-                    <Navbar.Brand href="/podcasts" className="text-muted fw-light lh-1">All podcasts</Navbar.Brand>
-                </Navbar>
-            </Col>
-        </Row>
     );
 }
 
@@ -146,11 +130,7 @@ function SearchEpisodes(props)
     return (
         <Row >
             <Col>
-                <div className="mt-10 mb-10" >
-                    <InputGroup className="shadow">
-                        <Form.Control type="search" placeholder="Search..." value={props.query} onChange={handleChange} />
-                    </InputGroup>
-                </div>
+                <Form.Control className="mt-10 shadow mb-10" type="search" placeholder="Search..." value={props.query} onChange={handleChange} />
             </Col>
         </Row>
     );
