@@ -5,6 +5,7 @@ import { generatePath } from 'react-router';
 import Image from 'react-bootstrap/Image';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import ListGroup from 'react-bootstrap/ListGroup';
@@ -33,11 +34,13 @@ export function Podcasts()
 function PodcastList(props)
 {
     return (
-        <div className="row">
-            {props.podcasts.map(podcast =>
-                <PodcastListItem podcast={podcast} key={podcast.id} />
-            )}
-        </div>
+        <Row>
+            <Col>
+                {props.podcasts.map(podcast =>
+                    <PodcastListItem podcast={podcast} key={podcast.id} />
+                )}
+            </Col>
+        </Row>
     )
 };
 
@@ -85,9 +88,7 @@ export function PodcastContainer()
 
     return (
         <Container className="pod-container">
-            <Navbar >
-                <Navbar.Brand href="/podcasts" className="text-muted fw-light lh-1">All podcasts</Navbar.Brand>
-            </Navbar>
+            <NavbarHeader />
             <PodcastHeader podcast={podcast} />
             <SearchEpisodes query={query} setQuery={setQuery} />
             <EpisodeList episodes={episodes} query={query} />
@@ -95,27 +96,42 @@ export function PodcastContainer()
     );
 }
 
+function NavbarHeader()
+{
+    return (
+        <Row>
+            <Col>
+                <Navbar >
+                    <Navbar.Brand href="/podcasts" className="text-muted fw-light lh-1">All podcasts</Navbar.Brand>
+                </Navbar>
+            </Col>
+        </Row>
+    );
+}
+
 function PodcastHeader(props)
 {
     return (
         <Row >
-            <div className="pod-header-width">
-                <div className="row no-gutters">
-                    <div className="col xs:{5}">
-                        <Image
-                            src={props.podcast.img_url}
-                            alt={'Podcast cover art'}
-                            className="rounded pod-header" />
-                    </div>
-                    <div className="col-md-9">
-                        <div className="card-body pad-0 mt-10">
-                            <h2>{props.podcast.title}</h2>
-                            <p>{props.podcast.description}</p>
+            <Col>
+                <div className="pod-header-width">
+                    <div className="row no-gutters">
+                        <div className="col xs:{5}">
+                            <Image
+                                src={props.podcast.img_url}
+                                alt={'Podcast cover art'}
+                                className="rounded pod-header" />
+                        </div>
+                        <div className="col-md-9">
+                            <div className="card-body pad-0 mt-10">
+                                <h2>{props.podcast.title}</h2>
+                                <p>{props.podcast.description}</p>
 
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </Col>
         </Row >
     )
 }
@@ -129,11 +145,13 @@ function SearchEpisodes(props)
     }
     return (
         <Row >
-            <div className="mt-10 mb-10" >
-                <InputGroup className="shadow">
-                    <Form.Control type="search" placeholder="Search..." value={props.query} onChange={handleChange} />
-                </InputGroup>
-            </div>
+            <Col>
+                <div className="mt-10 mb-10" >
+                    <InputGroup className="shadow">
+                        <Form.Control type="search" placeholder="Search..." value={props.query} onChange={handleChange} />
+                    </InputGroup>
+                </div>
+            </Col>
         </Row>
     );
 }
@@ -141,11 +159,15 @@ function SearchEpisodes(props)
 function EpisodeList(props)
 {
     return (
-        <ListGroup className="bg-gradient-dark" variant="flush" key={props.query}>
-            {props.episodes.map(
-                ep => <EpisodeListItem key={ep.id} episode={ep} />
-            )}
-        </ListGroup>
+        <Row>
+            <Col>
+                <ListGroup className="bg-gradient-dark" variant="flush" key={props.query}>
+                    {props.episodes.map(
+                        ep => <EpisodeListItem key={ep.id} episode={ep} />
+                    )}
+                </ListGroup>
+            </Col>
+        </Row>
     );
 }
 

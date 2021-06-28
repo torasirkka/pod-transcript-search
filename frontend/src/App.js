@@ -15,7 +15,6 @@ export function App()
 {
   return (
     <Router>
-      {/* <Link to="/podcasts">Podcasts</Link> */}
       <Switch>
         <Route path="/podcasts">
           <Podcasts />
