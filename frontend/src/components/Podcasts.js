@@ -83,11 +83,9 @@ export function PodcastContainer()
 
     return (
         <Container className="pod-container">
-            <Row>
-                <PodcastHeader podcast={podcast} />
-                <SearchEpisodes query={query} setQuery={setQuery} />
-                <EpisodeList episodes={episodes} query={query} />
-            </Row>
+            <PodcastHeader podcast={podcast} />
+            <SearchEpisodes query={query} setQuery={setQuery} />
+            <EpisodeList episodes={episodes} query={query} />
         </Container >
     );
 }
@@ -105,7 +103,7 @@ function PodcastHeader(props)
                             className="rounded pod-header" />
                     </div>
                     <div className="col-md-9">
-                        <div className="card-body">
+                        <div className="card-body pad-0 mt-10">
                             <h2>{props.podcast.title}</h2>
                             <p>{props.podcast.description}</p>
 

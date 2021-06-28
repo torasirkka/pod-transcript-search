@@ -51,11 +51,14 @@
 .date-font{
   color:#666;
   line-height: 8px;
-
 }
 
 .pod-container{
   max-width: 970px;
+}
+
+.pad-0{
+  padding: 0;
 }
 
 @keyframes App-logo-spin {
