@@ -100,13 +100,13 @@ function PodcastHeader(props)
             <Col>
                 <div className="pod-header-width">
                     <div className="row no-gutters">
-                        <div className="col xs:{5}">
+                        <div className="col xs:{5} child-1">
                             <Image
                                 src={props.podcast.img_url}
                                 alt={'Podcast cover art'}
                                 className="rounded pod-header" />
                         </div>
-                        <div className="col-md-9">
+                        <div className="col-md-9 child-2">
                             <div className="card-body pad-0 mt-10">
                                 <h2>{props.podcast.title}</h2>
                                 <p>{props.podcast.description}</p>

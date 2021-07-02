@@ -27,7 +27,13 @@
 .App-link {
   color: #61dafb;
 }
-
+.form-control:focus {
+  color: #111;
+  background-color: #fff;
+  border-color: #FFEF04;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
 .card{
   margin: 10px;
   padding: 0px;
@@ -50,9 +56,10 @@
   margin-bottom: 10px;
 }
 #navbar-text{
-  color:#f20e89;
+  color: #FF007F;
   font-weight: 700;
-  font-size: 2em;
+  font-size: 2.5em;
+  letter-spacing: 0.02em;
   margin-left: 10px; 
 }
 
@@ -68,6 +75,7 @@
 }
 
 .pod-container{
+  width: 100%;
   max-width: 870px;
 }
 .pod-header-width{
@@ -87,4 +95,10 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.col{
+  display: grid;
+  grid-template-columns: repeat( auto-fit, minmax(250px, 1fr) );
+  margin-right: 5px;
 }
