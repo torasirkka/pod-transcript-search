@@ -1,17 +1,4 @@
-.App {
-  text-align: left;
-}
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
 
 .App-header {
   background-color: #282c34;
@@ -97,7 +84,7 @@
   }
 }
 
-.col{
+.col-pods{
   display: grid;
   grid-template-columns: repeat( auto-fit, minmax(250px, 1fr) );
   margin-right: 5px;

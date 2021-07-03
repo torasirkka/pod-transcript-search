@@ -33,7 +33,7 @@ function PodcastList(props)
 {
     return (
         <Row>
-            <Col>
+            <Col className="col-pods">
                 {props.podcasts.map(podcast =>
                     <PodcastListItem podcast={podcast} key={podcast.id} />
                 )}
@@ -107,7 +107,7 @@ function PodcastHeader(props)
                                 className="rounded pod-header" />
                         </div>
                         <div className="col-md-9 child-2">
-                            <div className="card-body pad-0 mt-10">
+                            <div className="card-body pad-0">
                                 <h2>{props.podcast.title}</h2>
                                 <p>{props.podcast.description}</p>
 
