@@ -1,5 +1,7 @@
 # pod_transcript_search
 Welcome to the pod transcript search webb app!
+Check out this 2.5min video where I introduce the app and talk about how I solved some key challenges:
+https://youtu.be/hsC5ueL7obs
 
 ## Tech stack used:
 Languages used:
