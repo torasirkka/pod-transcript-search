@@ -1,17 +1,4 @@
-.App {
-  text-align: left;
-}
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
 
 .App-header {
   background-color: #282c34;
@@ -27,6 +14,71 @@
 .App-link {
   color: #61dafb;
 }
+.form-control:focus {
+  color: #111;
+  background-color: #fff;
+  border-color: #FFEF04;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+.card{
+  margin: 10px;
+  padding: 0px;
+  transition: transform 0.2s ease;
+}
+.card:hover {
+  transform: scale(1.1);
+}
+
+.pod-art{
+  width: 150px;
+}
+.mt-10 {
+  margin-top: 10px;
+}
+.mb-10{
+  margin-bottom: 10px;
+}
+.mb-0{
+  margin-bottom: 0;
+}
+.navbar{
+  background-color: White;
+  margin-bottom: 10px;
+  padding: 0px
+}
+#navbar-text{
+  color: #FF007F;
+  font-weight: 700;
+  font-size: 2em;
+  letter-spacing: 0.015em;
+  margin-left: 10px; 
+}
+
+
+.pod-header{
+  width: 100%;
+  max-width: 150px;
+}
+
+.date-font{
+  color:#666;
+  line-height: 8px;
+}
+
+.pod-container{
+  width: 100%;
+  max-width: 870px;
+}
+.pod-header-width{
+  width: 780px;
+}
+.pad-0{
+  padding: 0;
+}
+.pl-0{
+  padding-left: 0;
+}
 
 @keyframes App-logo-spin {
   from {
@@ -35,4 +87,10 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.col-pods{
+  display: grid;
+  grid-template-columns: repeat( auto-fit, minmax(250px, 1fr) );
+  margin-right: 5px;
 }

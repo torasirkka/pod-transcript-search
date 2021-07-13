@@ -1,18 +1,15 @@
 import sys
 
-from sqlalchemy.orm import joinedload
-
 sys.path.append(
-    "/Users/torasirkka/Documents/Hackbright2021/MyProject/podsearch/backend"
+    "/Users/torasirkka/Documents/Hackbright2021/MyProject/pod-transcript-search/backend"
 )
 import model
 import server
-from flask import jsonify
 from google.cloud import storage
-from typing import List
+from typing import List, Dict
 import json
+from sqlalchemy.orm import joinedload
 
-model.connect_to_db(server.app)
 
 BUCKET_NAME = "audiofiles-storage"
 TRANSCRIPTION_JSON_PATH = "transcripts"
@@ -32,19 +29,25 @@ def main():
     existing_transcripts = get_blob_names(client, BUCKET_NAME, TRANSCRIPTION_JSON_PATH)
 
     for ep in episodes:
-        transcribed_name = TRANSCRIPTION_JSON_PATH + "/" + ep.fname + ".json"
+        transcribed_name = TRANSCRIPTION_JSON_PATH + "/" + model.cache_id(ep) + ".json"
 
         if transcribed_name in existing_transcripts:
-            print(ep)
-            transcript = download_transcript(
+            transcript_dict = download_transcript(
                 client,
                 transcribed_name,
                 BUCKET_NAME,
             )
-            print(transcript)
-            ep.transcript = transcript
-            model.db.session.add(ep)
 
+            transcript = extract_transcript(transcript_dict)
+
+            ep.transcript = transcript
+            ep.searchepisode[0].transcript = transcript
+
+            model.db.session.add(ep)
+            model.db.session.add(ep.searchepisode[0])
+            print(
+                f"Added transcript to episode {ep.episode_title} and searchepisode {ep.searchepisode[0].searchepisodes_id}"
+            )
     model.db.session.commit()
 
 
@@ -69,5 +72,21 @@ def download_transcript(
     return json.loads(data)
 
 
+def extract_transcript(transcript: Dict) -> str:
+    """Extract the transcript from the response returned by Google speech API."""
+
+    # Each audio file is broken into snippets whose consecutive transcriptsare stored
+    # in a list under the key "results". Each snippet is a dict containing meta data
+    # and words offset data in addition to the transcript under the key "transcript".
+    # Loop through the list of snippetsto extract and combine the transcripts to one
+    # text.
+    print("Number of snippets: ", len(transcript["results"]))
+    snippets = []
+    for snippet in transcript["results"]:
+        snippets.append(snippet["alternatives"][0]["transcript"])
+    return "".join(snippets)
+
+
 if __name__ == "__main__":
+    model.connect_to_db(server.app)
     main()

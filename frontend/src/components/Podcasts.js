@@ -2,6 +2,12 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { Link, useParams } from "react-router-dom";
 import { generatePath } from 'react-router';
+import Image from 'react-bootstrap/Image';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
+import ListGroup from 'react-bootstrap/ListGroup';
 
 export function Podcasts()
 {
@@ -17,7 +23,7 @@ export function Podcasts()
         );
     }, []);
     return (
-        <div className='podcasts'>
+        <div className="container">
             <PodcastList podcasts={podcasts} />
         </div>
     );
@@ -26,15 +32,25 @@ export function Podcasts()
 function PodcastList(props)
 {
     return (
-        <ul>
-            {props.podcasts.map(podcast =>
-                <li key={podcast.title}>
-                    <Link to={generatePath("/podcast/:id", { id: podcast.id })}>{podcast.title}</Link>
-                </li>
-            )}
-        </ul>
+        <Row>
+            <Col className="col-pods">
+                {props.podcasts.map(podcast =>
+                    <PodcastListItem podcast={podcast} key={podcast.id} />
+                )}
+            </Col>
+        </Row>
     )
 };
+
+function PodcastListItem(props)
+{
+    return (
+        <div className="card shadow" style={{ width: 10 + 'em' }} >
+            <img src={props.podcast.img_url} alt={props.podcast.title} className="card-img-top rounded" />
+            <Link to={generatePath("/podcast/:id", { id: props.podcast.id })} className="stretched-link"></Link>
+        </div>
+    )
+}
 
 export function PodcastContainer()
 {
@@ -69,24 +85,41 @@ export function PodcastContainer()
     }
 
     return (
-        <div>
+        <Container className="pod-container">
             <PodcastHeader podcast={podcast} />
             <SearchEpisodes query={query} setQuery={setQuery} />
             <EpisodeList episodes={episodes} query={query} />
-        </div>
+        </Container >
     );
 }
 
 function PodcastHeader(props)
 {
     return (
-        <div className='podcast-details'>
-            <h2>{props.podcast.title}</h2>
-            <p>{props.podcast.description}</p>
-            <img src={props.podcast.img_url} alt={'Podcast cover art'} width={100} />
-        </div >
+        <Row className="mt-10">
+            <Col className="mt-10">
+                <div className="pod-header-width">
+                    <div className="row no-gutters">
+                        <div className="col xs:{5}">
+                            <Image
+                                src={props.podcast.img_url}
+                                alt={'Podcast cover art'}
+                                className="rounded pod-header" />
+                        </div>
+                        <div className="col-md-9">
+                            <div className="card-body pad-0">
+                                <h2>{props.podcast.title}</h2>
+                                <p>{props.podcast.description}</p>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </Col>
+        </Row >
     )
 }
+
 
 function SearchEpisodes(props)
 {
@@ -95,31 +128,36 @@ function SearchEpisodes(props)
         props.setQuery(e.target.value)
     }
     return (
-        <label>
-            Search episodes:
-            <input type="text" value={props.query} onChange={handleChange} />
-        </label>
+        <Row >
+            <Col>
+                <Form.Control className="mt-10 shadow mb-10" type="search" placeholder="Search..." value={props.query} onChange={handleChange} />
+            </Col>
+        </Row>
     );
 }
 
 function EpisodeList(props)
 {
     return (
-        <div key={props.query} className='episodes-list'>
-            {props.episodes.map(
-                ep => <EpisodeListItem key={ep.id} episode={ep} />
-            )}
-        </div >
+        <Row>
+            <Col>
+                <ListGroup className="bg-gradient-dark" variant="flush" key={props.query}>
+                    {props.episodes.map(
+                        ep => <EpisodeListItem key={ep.id} episode={ep} />
+                    )}
+                </ListGroup>
+            </Col>
+        </Row>
     );
 }
 
 function EpisodeListItem(props)
 {
     return (
-        <div>
-            <h3>{props.episode.title}</h3>
-            <p>{props.episode.description}</p>
-            <p>{props.episode.transcript}</p>
-        </div>
+        <ListGroup.Item className="bg-transparent pl-0">
+            <h5 className="">{props.episode.title}</h5>
+            <p className="text-muted fw-light lh-1">{props.episode.published}</p>
+            <p className="">{props.episode.description}</p>
+        </ListGroup.Item>
     );
 }
