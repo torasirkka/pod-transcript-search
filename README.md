@@ -9,7 +9,8 @@ Languages used:
 - Python (for the back-end),
 - JavaScript (for the front-end).
 
-Frameworks used:
+Frameworks and libraries used:
+- React,
 - Flask,
 - Flask-SQLAlchemy
 
