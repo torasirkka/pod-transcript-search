@@ -21,7 +21,7 @@ git clone git@github.com:torasirkka/pod-transcript-search.git
 You need Python3 and pip3 for this project. You also need the libraries and frameworks listed in requirements.txt. 
 ```
 cd pod-transcript-search
-pip3 install requirements.txt
+pip3 install -r requirements.txt
 createdb podcasts
 python3 server.py
 ```
